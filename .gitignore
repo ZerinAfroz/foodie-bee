@@ -1,0 +1,68 @@
+# ─── OS ───────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ─── IDE / Editor ────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-*
+
+# ─── Flutter / Dart ──────────────────────────
+app/.dart_tool/
+app/.pub-cache/
+app/.pub/
+app/build/
+app/*.symbols
+app/*.map.json
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/**/doc/api/
+
+# ─── Android ─────────────────────────────────
+app/android/local.properties
+app/android/key.properties
+app/android/app/*.keystore
+app/android/app/*.jks
+app/android/.gradle/
+app/android/captures/
+app/android/app/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ─── Firebase secrets ────────────────────────
+app/android/app/google-services.json
+app/ios/Runner/GoogleService-Info.plist
+.firebase/
+*.secret.*
+**/service-account*.json
+
+# ─── Unused platforms (Android-only MVP) ─────
+app/ios/
+app/web/
+app/linux/
+app/macos/
+app/windows/
+
+# ─── Cloud Functions ─────────────────────────
+functions/node_modules/
+functions/.runtimeconfig.json
+functions/*.log
+
+# ─── Environment ─────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
