@@ -4,6 +4,8 @@ import '../screens/auth/phone_auth_screen.dart';
 import '../screens/auth/role_selection_screen.dart';
 import '../screens/profile/donor_profile_screen.dart';
 import '../screens/profile/distributor_profile_screen.dart';
+import '../screens/donor/donor_home_screen.dart';
+import '../screens/food_listing/post_listing_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -14,6 +16,7 @@ class Routes {
   static const String distributorProfile = '/distributor-profile';
   static const String donorHome = '/donor-home';
   static const String distributorHome = '/distributor-home';
+  static const String postListing = '/post-listing';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -41,11 +44,15 @@ class Routes {
         );
       case donorHome:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Donor Home'),
+          builder: (_) => const DonorHomeScreen(),
         );
       case distributorHome:
         return MaterialPageRoute(
           builder: (_) => _placeholder('Distributor Home'),
+        );
+      case postListing:
+        return MaterialPageRoute(
+          builder: (_) => const PostListingScreen(),
         );
       default:
         return MaterialPageRoute(

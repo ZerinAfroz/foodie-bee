@@ -5,6 +5,7 @@ import 'config/theme.dart';
 import 'config/routes.dart';
 import 'config/constants.dart';
 import 'providers/auth_provider.dart';
+import 'providers/food_listing_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => FoodListingProvider()),
       ],
       child: const FoodieBeeApp(),
     ),

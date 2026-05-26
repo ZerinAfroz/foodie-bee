@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
-import '../../config/routes.dart';
 import 'otp_screen.dart';
 
 class PhoneAuthScreen extends StatefulWidget {

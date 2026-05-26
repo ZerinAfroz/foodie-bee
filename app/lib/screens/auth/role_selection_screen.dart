@@ -121,7 +121,7 @@ class _RoleCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.08) : Colors.white,
+          color: isSelected ? color.withValues(alpha: 0.08) : Colors.white,
           border: Border.all(
             color: isSelected ? color : Colors.grey[300]!,
             width: isSelected ? 2 : 1,

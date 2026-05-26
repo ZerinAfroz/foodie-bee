@@ -135,7 +135,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _businessType,
+                initialValue: _businessType,
                 decoration: InputDecoration(
                   labelText: 'Business type',
                   border: OutlineInputBorder(

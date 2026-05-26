@@ -14,8 +14,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   static const _defaultLocation = LatLng(23.8103, 90.4125);
   final _mapController = MapController();
   LatLng _selectedLocation = _defaultLocation;
-  bool _locationLoaded = false;
-
   @override
   void initState() {
     super.initState();
@@ -38,10 +36,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       _mapController.move(loc, 15);
       setState(() {
         _selectedLocation = loc;
-        _locationLoaded = true;
       });
     } catch (_) {
-      setState(() => _locationLoaded = true);
     }
   }
 
@@ -52,6 +48,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       _mapController.move(loc, 15);
       setState(() => _selectedLocation = loc);
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not get location')),
       );
@@ -103,7 +100,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 8,
                   ),
                 ],
