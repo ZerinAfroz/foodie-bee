@@ -70,6 +70,28 @@ class AuthProvider extends ChangeNotifier {
     userProfile = doc.exists ? doc : null;
   }
 
+  Future<void> createProfile(Map<String, dynamic> profileData) async {
+    if (firebaseUser == null) return;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await _firestore
+          .collection(AppConstants.collectionUsers)
+          .doc(firebaseUser!.uid)
+          .set({
+        ...profileData,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await _checkProfile();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   bool get isLoggedIn => firebaseUser != null;
   bool get hasProfile => userProfile != null;
   String get role => userProfile?['role'] ?? '';
