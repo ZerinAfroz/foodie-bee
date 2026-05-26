@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/splash/splash_screen.dart';
+import '../screens/auth/phone_auth_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -17,7 +18,7 @@ class Routes {
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case phoneAuth:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Phone Auth'),
+          builder: (_) => const PhoneAuthScreen(),
         );
       case otp:
         return MaterialPageRoute(

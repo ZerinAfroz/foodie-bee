@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'config/theme.dart';
 import 'config/routes.dart';
 import 'config/constants.dart';
+import 'providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const FoodieBeeApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: const FoodieBeeApp(),
+    ),
+  );
 }
 
 class FoodieBeeApp extends StatelessWidget {
