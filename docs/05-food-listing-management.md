@@ -59,7 +59,7 @@ Donors post surplus food listings. Each listing goes through a state machine fro
 
 ```dart
 Future<void> submitListing(ListingData data) async {
-  // 1. Upload photos to Firebase Storage
+  // 1. Upload photos to Cloudinary
   List<String> photoURLs = [];
   for (var image in data.images) {
     String url = await StorageService.uploadFoodImage(image);

@@ -36,7 +36,7 @@ foodie-bee/                       ← GitHub repo root
 │   │   ├── services/
 │   │   │   ├── auth_service.dart
 │   │   │   ├── firestore_service.dart
-│   │   │   ├── storage_service.dart
+│   │   │   ├── storage_service.dart   # Cloudinary image upload
 │   │   │   ├── notification_service.dart
 │   │   │   └── location_service.dart
 │   │   │
