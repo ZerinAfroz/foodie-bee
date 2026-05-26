@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
@@ -148,7 +149,8 @@ class _PostListingScreenState extends State<PostListingScreen> {
       'quantityUnit': _quantityUnit,
       'preparedAt': _preparedAt ?? DateTime.now(),
       'pickupDeadline': _pickupDeadline,
-      'location': GeoPoint(_location!.latitude, _location!.longitude),
+      'location': GeoFirePoint(
+              GeoPoint(_location!.latitude, _location!.longitude)).data,
       'address': _addressController.text.trim(),
       'specialNotes': _notesController.text.trim(),
       'status': 'available',

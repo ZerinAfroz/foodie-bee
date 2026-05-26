@@ -133,7 +133,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                     onTap: () => Navigator.pushNamed(
                       context,
                       '/listing-detail',
-                      arguments: doc.id,
+                      arguments: {'listingId': doc.id, 'viewMode': 'donor'},
                     ),
                   );
                 },

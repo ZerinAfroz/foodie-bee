@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 
 class ListingDetailScreen extends StatefulWidget {
   final String listingId;
-  const ListingDetailScreen({super.key, required this.listingId});
+  final String viewMode;
+
+  const ListingDetailScreen({
+    super.key,
+    required this.listingId,
+    this.viewMode = 'donor',
+  });
 
   @override
   State<ListingDetailScreen> createState() => _ListingDetailScreenState();
@@ -15,6 +22,7 @@ class ListingDetailScreen extends StatefulWidget {
 
 class _ListingDetailScreenState extends State<ListingDetailScreen> {
   DocumentSnapshot? _claim;
+  bool _claiming = false;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -52,13 +60,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
 
   Future<void> _updateStatus(String status) async {
     final provider = context.read<FoodListingProvider>();
-    provider.isLoading = true;
-    if (mounted) setState(() {});
+    setState(() {});
 
     try {
       await provider.updateListingStatus(widget.listingId, status);
     } finally {
-      provider.isLoading = false;
       if (mounted) setState(() {});
     }
   }
@@ -102,10 +108,36 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     }
   }
 
+  Future<void> _claimListing(String donorId) async {
+    setState(() => _claiming = true);
+    final provider = context.read<FoodListingProvider>();
+    final distributorId = context.read<AuthProvider>().firebaseUser!.uid;
+
+    final success = await provider.claimListing(
+      listingId: widget.listingId,
+      distributorId: distributorId,
+      donorId: donorId,
+    );
+
+    if (!mounted) return;
+    setState(() => _claiming = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Listing claimed!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Listing is no longer available'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<FoodListingProvider>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Listing Details')),
       body: StreamBuilder<DocumentSnapshot>(
@@ -123,6 +155,10 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final status = data['status'] as String? ?? '';
+          final donorId = data['donorId'] as String? ?? '';
+          final currentUid =
+              context.read<AuthProvider>().firebaseUser!.uid;
+          final isOwnListing = donorId == currentUid;
 
           if (status == 'claimed' && _claim == null) _loadClaim();
 
@@ -139,7 +175,8 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                 const SizedBox(height: 8),
                 Chip(
                   label: Text(status.replaceAll('_', ' '),
-                      style: const TextStyle(color: Colors.white, fontSize: 12)),
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 12)),
                   backgroundColor: _statusColor(status),
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -163,20 +200,39 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                _detailRow('Category', (data['category'] as String? ?? '').replaceAll('_', ' ')),
+                _detailRow('Donor', data['donorName'] as String? ?? ''),
+                if (widget.viewMode == 'distributor')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                            width: 120,
+                            child: Text('Phone',
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 13))),
+                        Expanded(
+                          child: Text(data['donorPhone'] as String? ?? '',
+                              style: const TextStyle(fontSize: 14)),
+                        ),
+                      ],
+                    ),
+                  ),
+                _detailRow('Category',
+                    (data['category'] as String? ?? '').replaceAll('_', ' ')),
                 _detailRow('Quantity',
                     '${data['quantity']} ${data['quantityUnit']}'),
                 _detailRow('Prepared at', _formatDt(data['preparedAt'])),
-                _detailRow('Pickup deadline', _formatDt(data['pickupDeadline'])),
+                _detailRow(
+                    'Pickup deadline', _formatDt(data['pickupDeadline'])),
                 _detailRow('Address', data['address'] as String? ?? ''),
-                _detailRow('Location',
-                    '${(data['location'] as GeoPoint?)?.latitude.toStringAsFixed(4)}, '
-                    '${(data['location'] as GeoPoint?)?.longitude.toStringAsFixed(4)}'),
 
                 if ((data['specialNotes'] as String? ?? '').isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Text('Special notes',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   const SizedBox(height: 4),
                   Text(data['specialNotes'] as String,
                       style: TextStyle(color: Colors.grey[700])),
@@ -184,7 +240,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
 
                 const SizedBox(height: 24),
 
-                if (_claim != null) ...[
+                if (_claim != null && widget.viewMode == 'donor') ...[
                   const Divider(),
                   const SizedBox(height: 8),
                   Text('Claimant info',
@@ -196,30 +252,25 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                if (status == 'claimed')
+                if (widget.viewMode == 'donor' && status == 'claimed')
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: provider.isLoading ? null : _confirmClaim,
+                          onPressed: _confirmClaim,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryColor,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: provider.isLoading
-                              ? const SizedBox(
-                                  width: 20, height: 20,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2, color: Colors.white))
-                              : const Text('Confirm'),
+                          child: const Text('Confirm'),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: provider.isLoading ? null : _rejectClaim,
+                          onPressed: _rejectClaim,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.errorColor,
                             side: const BorderSide(color: AppTheme.errorColor),
@@ -232,28 +283,23 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     ],
                   ),
 
-                if (status == 'picked_up')
+                if (widget.viewMode == 'donor' && status == 'picked_up')
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: provider.isLoading ? null : _markCompleted,
+                      onPressed: _markCompleted,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: provider.isLoading
-                          ? const SizedBox(
-                              width: 20, height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Mark Completed'),
+                      child: const Text('Mark Completed'),
                     ),
                   ),
 
-                if (status == 'confirmed')
+                if (widget.viewMode == 'donor' && status == 'confirmed')
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -262,6 +308,46 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('Awaiting pickup by distributor',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 15)),
+                  ),
+
+                if (widget.viewMode == 'distributor' &&
+                    status == 'available' &&
+                    !isOwnListing)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _claiming ? null : () => _claimListing(donorId),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.secondaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: _claiming
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white))
+                          : const Text('Claim This Food',
+                              style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+
+                if (widget.viewMode == 'distributor' && isOwnListing)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                        'This is your own listing',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.w500, fontSize: 15)),
@@ -282,7 +368,8 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120,
+          SizedBox(
+              width: 120,
               child: Text(label,
                   style: TextStyle(color: Colors.grey[600], fontSize: 13))),
           Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
@@ -304,7 +391,8 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
         final user = snapshot.data!.data() as Map<String, dynamic>?;
         final name = user?['name'] as String? ?? 'Unknown';
         final phone = user?['phone'] as String? ?? '';
-        final orgType = (user?['orgType'] as String? ?? '').replaceAll('_', ' ');
+        final orgType =
+            (user?['orgType'] as String? ?? '').replaceAll('_', ' ');
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

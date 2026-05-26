@@ -5,6 +5,8 @@ import '../screens/auth/role_selection_screen.dart';
 import '../screens/profile/donor_profile_screen.dart';
 import '../screens/profile/distributor_profile_screen.dart';
 import '../screens/donor/donor_home_screen.dart';
+import '../screens/distributor/distributor_home_screen.dart';
+import '../screens/distributor/map_discovery_screen.dart';
 import '../screens/food_listing/post_listing_screen.dart';
 import '../screens/food_listing/my_listings_screen.dart';
 import '../screens/food_listing/listing_detail_screen.dart';
@@ -21,6 +23,7 @@ class Routes {
   static const String postListing = '/post-listing';
   static const String myListings = '/my-listings';
   static const String listingDetail = '/listing-detail';
+  static const String mapDiscovery = '/map-discovery';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -52,7 +55,7 @@ class Routes {
         );
       case distributorHome:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Distributor Home'),
+          builder: (_) => const DistributorHomeScreen(),
         );
       case postListing:
         return MaterialPageRoute(
@@ -63,9 +66,16 @@ class Routes {
           builder: (_) => const MyListingsScreen(),
         );
       case listingDetail:
-        final listingId = settings.arguments as String;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (_) => ListingDetailScreen(listingId: listingId),
+          builder: (_) => ListingDetailScreen(
+            listingId: args['listingId'] as String,
+            viewMode: args['viewMode'] as String? ?? 'donor',
+          ),
+        );
+      case mapDiscovery:
+        return MaterialPageRoute(
+          builder: (_) => const MapDiscoveryScreen(),
         );
       default:
         return MaterialPageRoute(
