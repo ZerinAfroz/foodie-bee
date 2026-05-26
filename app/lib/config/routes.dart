@@ -6,6 +6,8 @@ import '../screens/profile/donor_profile_screen.dart';
 import '../screens/profile/distributor_profile_screen.dart';
 import '../screens/donor/donor_home_screen.dart';
 import '../screens/food_listing/post_listing_screen.dart';
+import '../screens/food_listing/my_listings_screen.dart';
+import '../screens/food_listing/listing_detail_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -17,6 +19,8 @@ class Routes {
   static const String donorHome = '/donor-home';
   static const String distributorHome = '/distributor-home';
   static const String postListing = '/post-listing';
+  static const String myListings = '/my-listings';
+  static const String listingDetail = '/listing-detail';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -53,6 +57,15 @@ class Routes {
       case postListing:
         return MaterialPageRoute(
           builder: (_) => const PostListingScreen(),
+        );
+      case myListings:
+        return MaterialPageRoute(
+          builder: (_) => const MyListingsScreen(),
+        );
+      case listingDetail:
+        final listingId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => ListingDetailScreen(listingId: listingId),
         );
       default:
         return MaterialPageRoute(

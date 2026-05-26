@@ -32,4 +32,32 @@ class FoodListingProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Stream<QuerySnapshot> getDonorListings(String donorId) {
+    return _firestore
+        .collection(AppConstants.collectionFoodListings)
+        .where('donorId', isEqualTo: donorId)
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  Future<void> updateListingStatus(String listingId, String status) async {
+    await _firestore
+        .collection(AppConstants.collectionFoodListings)
+        .doc(listingId)
+        .update({
+      'status': status,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<DocumentSnapshot?> getClaimForListing(String listingId) async {
+    final snapshot = await _firestore
+        .collection(AppConstants.collectionClaims)
+        .where('listingId', isEqualTo: listingId)
+        .where('status', whereIn: ['pending', 'confirmed', 'picked_up'])
+        .limit(1)
+        .get();
+    return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
+  }
 }
