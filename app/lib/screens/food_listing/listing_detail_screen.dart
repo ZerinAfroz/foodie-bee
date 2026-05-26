@@ -22,6 +22,7 @@ class ListingDetailScreen extends StatefulWidget {
 
 class _ListingDetailScreenState extends State<ListingDetailScreen> {
   DocumentSnapshot? _claim;
+  DocumentSnapshot? _distributorClaim;
   bool _claiming = false;
 
   Color _statusColor(String status) {
@@ -56,6 +57,14 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
         .read<FoodListingProvider>()
         .getClaimForListing(widget.listingId);
     if (mounted) setState(() => _claim = claim);
+  }
+
+  Future<void> _loadDistributorClaim() async {
+    final uid = context.read<AuthProvider>().firebaseUser!.uid;
+    final claim = await context
+        .read<FoodListingProvider>()
+        .getDistributorClaimForListing(widget.listingId, uid);
+    if (mounted) setState(() => _distributorClaim = claim);
   }
 
   Future<void> _updateStatus(String status) async {
@@ -106,6 +115,19 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
         'completedAt': FieldValue.serverTimestamp(),
       });
     }
+  }
+
+  Future<void> _markPickedUpByDistributor() async {
+    if (_distributorClaim == null) return;
+    final provider = context.read<FoodListingProvider>();
+    await provider.markPickedUp(
+      _distributorClaim!.id,
+      widget.listingId,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Marked as picked up!')),
+    );
   }
 
   Future<void> _claimListing(String donorId) async {
@@ -161,6 +183,10 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           final isOwnListing = donorId == currentUid;
 
           if (status == 'claimed' && _claim == null) _loadClaim();
+          if (widget.viewMode == 'distributor' && _distributorClaim == null) {
+            final statuses = ['pending', 'confirmed', 'picked_up', 'completed'];
+            if (statuses.contains(status)) _loadDistributorClaim();
+          }
 
           final photos = (data['photoURLs'] as List<dynamic>?) ?? [];
 
@@ -338,6 +364,14 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     ),
                   ),
 
+                if (widget.viewMode == 'distributor' &&
+                    _distributorClaim != null) ...[
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  _buildDistributorClaimStatus(),
+                  const SizedBox(height: 16),
+                ],
+
                 if (widget.viewMode == 'distributor' && isOwnListing)
                   Container(
                     width: double.infinity,
@@ -376,6 +410,72 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildDistributorClaimStatus() {
+    if (_distributorClaim == null) return const SizedBox.shrink();
+    final claimData = _distributorClaim!.data() as Map<String, dynamic>;
+    final claimStatus = claimData['status'] as String? ?? '';
+
+    switch (claimStatus) {
+      case 'pending':
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF9800).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text('Awaiting donor confirmation...',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+        );
+      case 'confirmed':
+        return SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _markPickedUpByDistributor,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Mark Picked Up',
+                style: TextStyle(fontSize: 16)),
+          ),
+        );
+      case 'picked_up':
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF9C27B0).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text('Awaiting donor to mark completed...',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+        );
+      case 'completed':
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text('Pickup completed',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  color: Colors.green)),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _claimantInfo(Map<String, dynamic> claim) {

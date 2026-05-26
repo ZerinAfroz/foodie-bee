@@ -7,6 +7,7 @@ import '../screens/profile/distributor_profile_screen.dart';
 import '../screens/donor/donor_home_screen.dart';
 import '../screens/distributor/distributor_home_screen.dart';
 import '../screens/distributor/map_discovery_screen.dart';
+import '../screens/distributor/my_claims_screen.dart';
 import '../screens/food_listing/post_listing_screen.dart';
 import '../screens/food_listing/my_listings_screen.dart';
 import '../screens/food_listing/listing_detail_screen.dart';
@@ -24,6 +25,7 @@ class Routes {
   static const String myListings = '/my-listings';
   static const String listingDetail = '/listing-detail';
   static const String mapDiscovery = '/map-discovery';
+  static const String myClaims = '/my-claims';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -76,6 +78,10 @@ class Routes {
       case mapDiscovery:
         return MaterialPageRoute(
           builder: (_) => const MapDiscoveryScreen(),
+        );
+      case myClaims:
+        return MaterialPageRoute(
+          builder: (_) => const MyClaimsScreen(),
         );
       default:
         return MaterialPageRoute(

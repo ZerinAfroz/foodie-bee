@@ -47,7 +47,7 @@ class DistributorHomeScreen extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -60,6 +60,25 @@ class DistributorHomeScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.secondaryColor,
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/my-claims'),
+                  icon: const Icon(Icons.list_alt, size: 24),
+                  label: const Text('My Claims',
+                      style: TextStyle(fontSize: 16)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.secondaryColor,
+                    side: const BorderSide(color: AppTheme.secondaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

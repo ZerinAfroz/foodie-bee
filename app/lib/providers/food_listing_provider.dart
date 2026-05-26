@@ -126,4 +126,42 @@ class FoodListingProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  Stream<QuerySnapshot> getDistributorClaims(String distributorId) {
+    return _firestore
+        .collection(AppConstants.collectionClaims)
+        .where('distributorId', isEqualTo: distributorId)
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  Future<void> markPickedUp(String claimId, String listingId) async {
+    await _firestore.runTransaction((transaction) async {
+      final listingRef =
+          _firestore.collection(AppConstants.collectionFoodListings).doc(listingId);
+      transaction.update(listingRef, {
+        'status': 'picked_up',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      final claimDocRef =
+          _firestore.collection(AppConstants.collectionClaims).doc(claimId);
+      transaction.update(claimDocRef, {
+        'status': 'picked_up',
+        'pickedUpAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<DocumentSnapshot?> getDistributorClaimForListing(
+      String listingId, String distributorId) async {
+    final snapshot = await _firestore
+        .collection(AppConstants.collectionClaims)
+        .where('listingId', isEqualTo: listingId)
+        .where('distributorId', isEqualTo: distributorId)
+        .limit(1)
+        .get();
+    return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
+  }
 }
