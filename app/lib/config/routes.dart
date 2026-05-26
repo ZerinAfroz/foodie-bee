@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/auth/phone_auth_screen.dart';
+import '../screens/auth/role_selection_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -26,7 +27,7 @@ class Routes {
         );
       case roleSelection:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Role Selection'),
+          builder: (_) => const RoleSelectionScreen(),
         );
       case donorProfile:
         return MaterialPageRoute(
