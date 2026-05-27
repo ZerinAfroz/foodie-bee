@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,11 @@ void main() async {
   );
 
   NotificationService.instance.init(navigatorKey: navigatorKey);
+
+  Timer.periodic(const Duration(seconds: 60), (_) async {
+    final provider = FoodListingProvider();
+    await provider.expirePastDeadlines();
+  });
 }
 
 class FoodieBeeApp extends StatelessWidget {

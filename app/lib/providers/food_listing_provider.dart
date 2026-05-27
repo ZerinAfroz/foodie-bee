@@ -274,6 +274,61 @@ class FoodListingProvider extends ChangeNotifier {
     return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
   }
 
+  Future<void> expirePastDeadlines() async {
+    final now = DateTime.now();
+    final batch = _firestore.batch();
+    bool hasChanges = false;
+
+    final availableDocs = await _firestore
+        .collection(AppConstants.collectionFoodListings)
+        .where('status', isEqualTo: 'available')
+        .get();
+
+    for (final doc in availableDocs.docs) {
+      final deadline = (doc['pickupDeadline'] as Timestamp?)?.toDate();
+      if (deadline != null && deadline.isBefore(now)) {
+        hasChanges = true;
+        batch.update(doc.reference, {
+          'status': 'expired',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    }
+
+    final claimedDocs = await _firestore
+        .collection(AppConstants.collectionFoodListings)
+        .where('status', isEqualTo: 'claimed')
+        .get();
+
+    for (final doc in claimedDocs.docs) {
+      final deadline = (doc['pickupDeadline'] as Timestamp?)?.toDate();
+      if (deadline != null && deadline.isBefore(now)) {
+        hasChanges = true;
+        batch.update(doc.reference, {
+          'status': 'expired',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        final claims = await _firestore
+            .collection(AppConstants.collectionClaims)
+            .where('listingId', isEqualTo: doc.id)
+            .where('status', isEqualTo: 'pending')
+            .get();
+        for (final claim in claims.docs) {
+          batch.update(claim.reference, {
+            'status': 'cancelled',
+            'cancelledAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    }
+
+    if (hasChanges) {
+      await batch.commit();
+    }
+  }
+
   Future<void> _writeNotification({
     required String userId,
     required String title,
