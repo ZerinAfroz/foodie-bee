@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
 import '../config/constants.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -83,7 +84,7 @@ class AuthProvider extends ChangeNotifier {
           .set({
         ...profileData,
         'createdAt': FieldValue.serverTimestamp(),
-      });
+      }, SetOptions(merge: true));
 
       await _checkProfile();
     } finally {
@@ -97,6 +98,7 @@ class AuthProvider extends ChangeNotifier {
   String get role => userProfile?['role'] ?? '';
 
   Future<void> logout() async {
+    await NotificationService.instance.clearToken();
     await _authService.logout();
     firebaseUser = null;
     userProfile = null;
