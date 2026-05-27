@@ -6,10 +6,14 @@ import 'config/routes.dart';
 import 'config/constants.dart';
 import 'providers/auth_provider.dart';
 import 'providers/food_listing_provider.dart';
+import 'services/notification_service.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
   runApp(
     MultiProvider(
       providers: [
@@ -19,6 +23,8 @@ void main() async {
       child: const FoodieBeeApp(),
     ),
   );
+
+  NotificationService.instance.init(navigatorKey: navigatorKey);
 }
 
 class FoodieBeeApp extends StatelessWidget {
@@ -29,6 +35,7 @@ class FoodieBeeApp extends StatelessWidget {
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       theme: AppTheme.lightTheme,
       initialRoute: Routes.splash,
       onGenerateRoute: Routes.generateRoute,

@@ -6,6 +6,7 @@ import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
 
+
 class MyClaimsScreen extends StatefulWidget {
   const MyClaimsScreen({super.key});
 
@@ -31,8 +32,26 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
 
   Future<void> _markPickedUp(String claimId, String listingId) async {
     final provider = context.read<FoodListingProvider>();
+    final auth = context.read<AuthProvider>();
+    final distributorName =
+        auth.userProfile?.get('name') as String? ?? 'A distributor';
+
     try {
-      await provider.markPickedUp(claimId, listingId);
+      final listing = await FirebaseFirestore.instance
+          .collection(AppConstants.collectionFoodListings)
+          .doc(listingId)
+          .get();
+      final listingData = listing.data();
+      final listingTitle = listingData?['title'] as String? ?? '';
+      final donorId = listingData?['donorId'] as String? ?? '';
+
+      await provider.markPickedUp(
+        claimId: claimId,
+        listingId: listingId,
+        listingTitle: listingTitle,
+        donorId: donorId,
+        distributorName: distributorName,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Marked as picked up!')),

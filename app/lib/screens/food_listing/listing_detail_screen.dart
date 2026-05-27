@@ -67,62 +67,63 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     if (mounted) setState(() => _distributorClaim = claim);
   }
 
-  Future<void> _updateStatus(String status) async {
-    final provider = context.read<FoodListingProvider>();
-    setState(() {});
-
-    try {
-      await provider.updateListingStatus(widget.listingId, status);
-    } finally {
-      if (mounted) setState(() {});
-    }
-  }
-
-  Future<void> _confirmClaim() async {
+  Future<void> _confirmClaim(Map<String, dynamic> listingData) async {
     if (_claim == null) return;
-    await _updateStatus('confirmed');
-    await FirebaseFirestore.instance
-        .collection('claims')
-        .doc(_claim!.id)
-        .update({
-      'status': 'confirmed',
-      'respondedAt': FieldValue.serverTimestamp(),
-    });
+    final claimData = _claim!.data() as Map<String, dynamic>;
+    final distributorId = claimData['distributorId'] as String;
+
+    await context.read<FoodListingProvider>().confirmClaim(
+      claimId: _claim!.id,
+      listingId: widget.listingId,
+      listingTitle: listingData['title'] as String? ?? '',
+      donorPhone: listingData['donorPhone'] as String? ?? '',
+      distributorId: distributorId,
+    );
     _loadClaim();
   }
 
-  Future<void> _rejectClaim() async {
+  Future<void> _rejectClaim(Map<String, dynamic> listingData) async {
     if (_claim == null) return;
-    await FirebaseFirestore.instance
-        .collection('claims')
-        .doc(_claim!.id)
-        .update({
-      'status': 'rejected',
-      'cancelledAt': FieldValue.serverTimestamp(),
-    });
-    await _updateStatus('available');
+    final claimData = _claim!.data() as Map<String, dynamic>;
+    final distributorId = claimData['distributorId'] as String;
+
+    await context.read<FoodListingProvider>().rejectClaim(
+      claimId: _claim!.id,
+      listingId: widget.listingId,
+      listingTitle: listingData['title'] as String? ?? '',
+      distributorId: distributorId,
+    );
     _loadClaim();
   }
 
-  Future<void> _markCompleted() async {
-    await _updateStatus('completed');
-    if (_claim != null) {
-      await FirebaseFirestore.instance
-          .collection('claims')
-          .doc(_claim!.id)
-          .update({
-        'status': 'completed',
-        'completedAt': FieldValue.serverTimestamp(),
-      });
-    }
+  Future<void> _markCompleted(Map<String, dynamic> listingData) async {
+    if (_claim == null) return;
+    final claimData = _claim!.data() as Map<String, dynamic>;
+    final distributorId = claimData['distributorId'] as String;
+
+    await context.read<FoodListingProvider>().completePickup(
+      claimId: _claim!.id,
+      listingId: widget.listingId,
+      listingTitle: listingData['title'] as String? ?? '',
+      distributorId: distributorId,
+    );
   }
 
-  Future<void> _markPickedUpByDistributor() async {
+  Future<void> _markPickedUpByDistributor(
+      Map<String, dynamic> listingData) async {
     if (_distributorClaim == null) return;
+    final auth = context.read<AuthProvider>();
+    final distributorName =
+        auth.userProfile?.get('name') as String? ?? 'A distributor';
+    final donorId = listingData['donorId'] as String? ?? '';
+
     final provider = context.read<FoodListingProvider>();
     await provider.markPickedUp(
-      _distributorClaim!.id,
-      widget.listingId,
+      claimId: _distributorClaim!.id,
+      listingId: widget.listingId,
+      listingTitle: listingData['title'] as String? ?? '',
+      donorId: donorId,
+      distributorName: distributorName,
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -130,15 +131,21 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     );
   }
 
-  Future<void> _claimListing(String donorId) async {
+  Future<void> _claimListing(Map<String, dynamic> listingData) async {
     setState(() => _claiming = true);
+    final auth = context.read<AuthProvider>();
     final provider = context.read<FoodListingProvider>();
-    final distributorId = context.read<AuthProvider>().firebaseUser!.uid;
+    final distributorId = auth.firebaseUser!.uid;
+    final distributorName =
+        auth.userProfile?.get('name') as String? ?? 'A distributor';
+    final donorId = listingData['donorId'] as String? ?? '';
 
     final success = await provider.claimListing(
       listingId: widget.listingId,
       distributorId: distributorId,
       donorId: donorId,
+      listingTitle: listingData['title'] as String? ?? '',
+      distributorName: distributorName,
     );
 
     if (!mounted) return;
@@ -283,7 +290,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _confirmClaim,
+                          onPressed: () => _confirmClaim(data),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryColor,
                             foregroundColor: Colors.white,
@@ -296,7 +303,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _rejectClaim,
+                          onPressed: () => _rejectClaim(data),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.errorColor,
                             side: const BorderSide(color: AppTheme.errorColor),
@@ -314,7 +321,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _markCompleted,
+                      onPressed: () => _markCompleted(data),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
@@ -346,7 +353,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _claiming ? null : () => _claimListing(donorId),
+                      onPressed: _claiming ? null : () => _claimListing(data),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.secondaryColor,
                         foregroundColor: Colors.white,
@@ -368,7 +375,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     _distributorClaim != null) ...[
                   const Divider(),
                   const SizedBox(height: 8),
-                  _buildDistributorClaimStatus(),
+                  _buildDistributorClaimStatus(data),
                   const SizedBox(height: 16),
                 ],
 
@@ -412,7 +419,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     );
   }
 
-  Widget _buildDistributorClaimStatus() {
+  Widget _buildDistributorClaimStatus(Map<String, dynamic> listingData) {
     if (_distributorClaim == null) return const SizedBox.shrink();
     final claimData = _distributorClaim!.data() as Map<String, dynamic>;
     final claimStatus = claimData['status'] as String? ?? '';
@@ -435,7 +442,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: _markPickedUpByDistributor,
+            onPressed: () => _markPickedUpByDistributor(listingData),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
               foregroundColor: Colors.white,

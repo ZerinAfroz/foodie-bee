@@ -94,6 +94,8 @@ class FoodListingProvider extends ChangeNotifier {
     required String listingId,
     required String distributorId,
     required String donorId,
+    required String listingTitle,
+    required String distributorName,
   }) async {
     try {
       await _firestore.runTransaction((transaction) async {
@@ -121,6 +123,15 @@ class FoodListingProvider extends ChangeNotifier {
           'updatedAt': FieldValue.serverTimestamp(),
         });
       });
+
+      await _writeNotification(
+        userId: donorId,
+        title: 'New Claim',
+        body: '$distributorName wants to pick up $listingTitle',
+        type: 'claim_received',
+        listingId: listingId,
+      );
+
       return true;
     } catch (_) {
       return false;
@@ -135,7 +146,13 @@ class FoodListingProvider extends ChangeNotifier {
         .snapshots();
   }
 
-  Future<void> markPickedUp(String claimId, String listingId) async {
+  Future<void> markPickedUp({
+    required String claimId,
+    required String listingId,
+    required String listingTitle,
+    required String donorId,
+    required String distributorName,
+  }) async {
     await _firestore.runTransaction((transaction) async {
       final listingRef =
           _firestore.collection(AppConstants.collectionFoodListings).doc(listingId);
@@ -152,6 +169,98 @@ class FoodListingProvider extends ChangeNotifier {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     });
+
+    await _writeNotification(
+      userId: donorId,
+      title: 'Food Picked Up',
+      body: '$distributorName has picked up $listingTitle. Confirm completion.',
+      type: 'pickup_completed',
+      listingId: listingId,
+      claimId: claimId,
+    );
+  }
+
+  Future<void> confirmClaim({
+    required String claimId,
+    required String listingId,
+    required String listingTitle,
+    required String donorPhone,
+    required String distributorId,
+  }) async {
+    await updateListingStatus(listingId, 'confirmed');
+
+    await _firestore
+        .collection(AppConstants.collectionClaims)
+        .doc(claimId)
+        .update({
+      'status': 'confirmed',
+      'respondedAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await _writeNotification(
+      userId: distributorId,
+      title: 'Claim Confirmed',
+      body:
+          'Your claim for $listingTitle has been confirmed. Contact donor at $donorPhone',
+      type: 'claim_confirmed',
+      listingId: listingId,
+      claimId: claimId,
+    );
+  }
+
+  Future<void> rejectClaim({
+    required String claimId,
+    required String listingId,
+    required String listingTitle,
+    required String distributorId,
+  }) async {
+    await updateListingStatus(listingId, 'available');
+
+    await _firestore
+        .collection(AppConstants.collectionClaims)
+        .doc(claimId)
+        .update({
+      'status': 'rejected',
+      'cancelledAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await _writeNotification(
+      userId: distributorId,
+      title: 'Claim Rejected',
+      body: 'Your claim for $listingTitle was not accepted',
+      type: 'claim_rejected',
+      listingId: listingId,
+      claimId: claimId,
+    );
+  }
+
+  Future<void> completePickup({
+    required String claimId,
+    required String listingId,
+    required String listingTitle,
+    required String distributorId,
+  }) async {
+    await updateListingStatus(listingId, 'completed');
+
+    await _firestore
+        .collection(AppConstants.collectionClaims)
+        .doc(claimId)
+        .update({
+      'status': 'completed',
+      'completedAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await _writeNotification(
+      userId: distributorId,
+      title: 'Pickup Complete',
+      body: 'Pickup for $listingTitle is complete. Thank you!',
+      type: 'pickup_confirmed',
+      listingId: listingId,
+      claimId: claimId,
+    );
   }
 
   Future<DocumentSnapshot?> getDistributorClaimForListing(
@@ -163,5 +272,25 @@ class FoodListingProvider extends ChangeNotifier {
         .limit(1)
         .get();
     return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
+  }
+
+  Future<void> _writeNotification({
+    required String userId,
+    required String title,
+    required String body,
+    required String type,
+    String? listingId,
+    String? claimId,
+  }) async {
+    await _firestore.collection(AppConstants.collectionNotifications).add({
+      'userId': userId,
+      'title': title,
+      'body': body,
+      'type': type,
+      'listingId': listingId ?? '',
+      'claimId': claimId ?? '',
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 }

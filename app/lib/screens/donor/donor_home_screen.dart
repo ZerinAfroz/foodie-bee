@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
+import '../../services/notification_service.dart';
 
 class DonorHomeScreen extends StatelessWidget {
   const DonorHomeScreen({super.key});
@@ -15,6 +16,7 @@ class DonorHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Foodie Bee'),
         actions: [
+          _NotificationBell(uid: auth.firebaseUser!.uid),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -88,6 +90,51 @@ class DonorHomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NotificationBell extends StatelessWidget {
+  final String uid;
+  const _NotificationBell({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () => Navigator.pushNamed(context, '/notifications'),
+        ),
+        StreamBuilder<int>(
+          stream: NotificationService.instance.unreadCount(uid),
+          builder: (context, snapshot) {
+            final count = snapshot.data ?? 0;
+            if (count == 0) return const SizedBox();
+            return Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                    minWidth: 18, minHeight: 18),
+                child: Text(
+                  count > 9 ? '9+' : '$count',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
