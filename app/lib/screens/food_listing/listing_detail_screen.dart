@@ -24,6 +24,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   DocumentSnapshot? _claim;
   DocumentSnapshot? _distributorClaim;
   bool _claiming = false;
+  bool _expiryChecked = false;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -188,6 +189,20 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           final currentUid =
               context.read<AuthProvider>().firebaseUser!.uid;
           final isOwnListing = donorId == currentUid;
+
+          if (!_expiryChecked) {
+            _expiryChecked = true;
+            final expiredStatuses = ['available', 'claimed'];
+            if (expiredStatuses.contains(status)) {
+              final deadline =
+                  (data['pickupDeadline'] as Timestamp?)?.toDate();
+              if (deadline != null && deadline.isBefore(DateTime.now())) {
+                context
+                    .read<FoodListingProvider>()
+                    .updateListingStatus(widget.listingId, 'expired');
+              }
+            }
+          }
 
           if (status == 'claimed' && _claim == null) _loadClaim();
           if (widget.viewMode == 'distributor' && _distributorClaim == null) {
