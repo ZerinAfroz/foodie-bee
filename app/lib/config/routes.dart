@@ -4,6 +4,13 @@ import '../screens/auth/phone_auth_screen.dart';
 import '../screens/auth/role_selection_screen.dart';
 import '../screens/profile/donor_profile_screen.dart';
 import '../screens/profile/distributor_profile_screen.dart';
+import '../screens/donor/donor_home_screen.dart';
+import '../screens/distributor/distributor_home_screen.dart';
+import '../screens/distributor/map_discovery_screen.dart';
+import '../screens/distributor/my_claims_screen.dart';
+import '../screens/food_listing/post_listing_screen.dart';
+import '../screens/food_listing/my_listings_screen.dart';
+import '../screens/food_listing/listing_detail_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -14,6 +21,11 @@ class Routes {
   static const String distributorProfile = '/distributor-profile';
   static const String donorHome = '/donor-home';
   static const String distributorHome = '/distributor-home';
+  static const String postListing = '/post-listing';
+  static const String myListings = '/my-listings';
+  static const String listingDetail = '/listing-detail';
+  static const String mapDiscovery = '/map-discovery';
+  static const String myClaims = '/my-claims';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -41,11 +53,35 @@ class Routes {
         );
       case donorHome:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Donor Home'),
+          builder: (_) => const DonorHomeScreen(),
         );
       case distributorHome:
         return MaterialPageRoute(
-          builder: (_) => _placeholder('Distributor Home'),
+          builder: (_) => const DistributorHomeScreen(),
+        );
+      case postListing:
+        return MaterialPageRoute(
+          builder: (_) => const PostListingScreen(),
+        );
+      case myListings:
+        return MaterialPageRoute(
+          builder: (_) => const MyListingsScreen(),
+        );
+      case listingDetail:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ListingDetailScreen(
+            listingId: args['listingId'] as String,
+            viewMode: args['viewMode'] as String? ?? 'donor',
+          ),
+        );
+      case mapDiscovery:
+        return MaterialPageRoute(
+          builder: (_) => const MapDiscoveryScreen(),
+        );
+      case myClaims:
+        return MaterialPageRoute(
+          builder: (_) => const MyClaimsScreen(),
         );
       default:
         return MaterialPageRoute(

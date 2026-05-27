@@ -139,7 +139,7 @@ class _DistributorProfileScreenState extends State<DistributorProfileScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _orgType,
+                initialValue: _orgType,
                 decoration: InputDecoration(
                   labelText: 'Organization type',
                   border: OutlineInputBorder(
@@ -207,7 +207,7 @@ class _DistributorProfileScreenState extends State<DistributorProfileScreen> {
                   Switch(
                     value: _hasVehicle,
                     onChanged: (v) => setState(() => _hasVehicle = v),
-                    activeColor: AppTheme.primaryColor,
+                    activeThumbColor: AppTheme.primaryColor,
                   ),
                 ],
               ),
@@ -235,7 +235,7 @@ class _DistributorProfileScreenState extends State<DistributorProfileScreen> {
                   return FilterChip(
                     label: Text(type.replaceAll('_', ' ')),
                     selected: selected,
-                    selectedColor: AppTheme.primaryColor.withOpacity(0.2),
+                    selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                     onSelected: (_) => _toggleFoodType(type),
                   );
                 }).toList(),
