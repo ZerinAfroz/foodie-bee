@@ -318,7 +318,29 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => _rejectClaim(data),
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Reject Claim'),
+                              content: const Text(
+                                  'Are you sure you want to reject this claim?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    _rejectClaim(data);
+                                  },
+                                  child: const Text('Reject',
+                                      style: TextStyle(
+                                          color: AppTheme.errorColor)),
+                                ),
+                              ],
+                            ),
+                          ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.errorColor,
                             side: const BorderSide(color: AppTheme.errorColor),
@@ -336,7 +358,27 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () => _markCompleted(data),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Mark Completed'),
+                          content: const Text(
+                              'Confirm that the pickup has been completed?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(ctx);
+                                _markCompleted(data);
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          ],
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
