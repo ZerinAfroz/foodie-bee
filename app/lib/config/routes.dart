@@ -12,6 +12,7 @@ import '../screens/food_listing/post_listing_screen.dart';
 import '../screens/food_listing/my_listings_screen.dart';
 import '../screens/food_listing/listing_detail_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
+import '../screens/profile/profile_view_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -28,6 +29,7 @@ class Routes {
   static const String mapDiscovery = '/map-discovery';
   static const String myClaims = '/my-claims';
   static const String notifications = '/notifications';
+  static const String profile = '/profile';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -88,6 +90,10 @@ class Routes {
       case notifications:
         return MaterialPageRoute(
           builder: (_) => const NotificationsScreen(),
+        );
+      case profile:
+        return MaterialPageRoute(
+          builder: (_) => const ProfileViewScreen(),
         );
       default:
         return MaterialPageRoute(

@@ -16,6 +16,10 @@ class DistributorHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Foodie Bee'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+          ),
           _NotificationBell(uid: auth.firebaseUser!.uid),
           IconButton(
             icon: const Icon(Icons.logout),
