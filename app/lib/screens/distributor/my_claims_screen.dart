@@ -136,9 +136,25 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
             children: tabs.map((docs) {
               if (docs.isEmpty) {
                 return Center(
-                  child: Text(
-                    'No claims here yet',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off,
+                          size: 48, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No claims yet',
+                        style: TextStyle(
+                            color: Colors.grey[600], fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/map-discovery'),
+                        icon: const Icon(Icons.map, size: 18),
+                        label: const Text('Find food to claim'),
+                      ),
+                    ],
                   ),
                 );
               }

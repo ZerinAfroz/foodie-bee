@@ -113,9 +113,25 @@ class _MyListingsScreenState extends State<MyListingsScreen>
             children: tabs.map((docs) {
               if (docs.isEmpty) {
                 return Center(
-                  child: Text(
-                    'No listings here yet',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.restaurant_menu,
+                          size: 48, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No listings yet',
+                        style: TextStyle(
+                            color: Colors.grey[600], fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/post-listing'),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Post your first listing'),
+                      ),
+                    ],
                   ),
                 );
               }
