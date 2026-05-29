@@ -15,6 +15,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  String _status = 'Loading...';
+  bool _hasError = false;
+
   @override
   void initState() {
     super.initState();
@@ -22,6 +25,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuth() async {
+    setState(() {
+      _hasError = false;
+      _status = 'Loading...';
+    });
+
     await Future.delayed(const Duration(milliseconds: 800));
 
     if (mounted) {
@@ -35,21 +43,33 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    final doc = await FirebaseFirestore.instance
-        .collection(AppConstants.collectionUsers)
-        .doc(user.uid)
-        .get();
+    setState(() => _status = 'Loading profile...');
 
-    if (!doc.exists) {
-      _navigate(Routes.roleSelection);
-      return;
-    }
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(AppConstants.collectionUsers)
+          .doc(user.uid)
+          .get()
+          .timeout(const Duration(seconds: 10));
 
-    final role = doc.data()?['role'] as String?;
-    if (role == 'donor') {
-      _navigate(Routes.donorHome);
-    } else {
-      _navigate(Routes.distributorHome);
+      if (!doc.exists) {
+        _navigate(Routes.roleSelection);
+        return;
+      }
+
+      final role = doc.data()?['role'] as String?;
+      if (role == 'donor') {
+        _navigate(Routes.donorHome);
+      } else {
+        _navigate(Routes.distributorHome);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _status = 'Something went wrong';
+        });
+      }
     }
   }
 
@@ -78,8 +98,32 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Connecting surplus food with those who need it',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
             const SizedBox(height: 32),
-            const CircularProgressIndicator(),
+            if (_hasError) ...[
+              Text(
+                _status,
+                style: TextStyle(color: AppTheme.errorColor, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: _checkAuth,
+                child: const Text('Retry'),
+              ),
+            ] else ...[
+              Text(
+                _status,
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              const CircularProgressIndicator(),
+            ],
           ],
         ),
       ),
