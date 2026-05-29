@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../config/routes.dart';
 import '../profile/map_picker_screen.dart';
 
 class PostListingScreen extends StatefulWidget {
@@ -166,7 +167,7 @@ class _PostListingScreenState extends State<PostListingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Food listing posted!')),
       );
-      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, Routes.myListings);
     } catch (e) {
       if (!mounted) return;
       _showError('Failed to post listing. Try again.');

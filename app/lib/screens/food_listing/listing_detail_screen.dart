@@ -81,7 +81,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       donorPhone: listingData['donorPhone'] as String? ?? '',
       distributorId: distributorId,
     );
-    _loadClaim();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Claim confirmed!')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _rejectClaim(Map<String, dynamic> listingData) async {
@@ -95,7 +99,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       listingTitle: listingData['title'] as String? ?? '',
       distributorId: distributorId,
     );
-    _loadClaim();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Claim rejected.')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _markCompleted(Map<String, dynamic> listingData) async {
@@ -109,6 +117,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       listingTitle: listingData['title'] as String? ?? '',
       distributorId: distributorId,
     );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pickup completed!')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _markPickedUpByDistributor(

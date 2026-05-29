@@ -16,9 +16,8 @@ Android Flutter app — connects surplus food donors with distributors in Bangla
 
 ## Project Structure
 - `app/` — Flutter app, Android-only (ios/web/linux/macos/windows removed from tree)
-- `app/lib/`: `config/` `providers/` `services/` `screens/` `widgets/` `models/` (mostly scaffolding)
-- `docs/` — 9 planning/architecture documents
-- `app2/` — stale build artifact from rename, safe to delete
+- `app/lib/`: `config/` `providers/` `services/` `screens/` `widgets/` `models/` — `widgets/` and `screens/claim/` are empty scaffolded dirs; `models/` has only `notification_item.dart`
+- `docs/` — 10 planning/architecture documents
 
 ## Key Conventions
 - snake_case files, PascalCase classes, camelCase fields/vars
