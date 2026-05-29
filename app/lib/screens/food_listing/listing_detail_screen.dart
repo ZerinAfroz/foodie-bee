@@ -25,6 +25,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   DocumentSnapshot? _distributorClaim;
   bool _claiming = false;
   bool _expiryChecked = false;
+  String _appBarTitle = 'Listing Details';
 
   Color _statusColor(String status) {
     switch (status) {
@@ -169,7 +170,13 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Listing Details')),
+      appBar: AppBar(
+        title: Text(
+          _appBarTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('foodListings')
@@ -189,6 +196,13 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           final currentUid =
               context.read<AuthProvider>().firebaseUser!.uid;
           final isOwnListing = donorId == currentUid;
+
+          final newTitle = data['title'] as String? ?? 'Listing Details';
+          if (_appBarTitle != newTitle && mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _appBarTitle = newTitle);
+            });
+          }
 
           if (!_expiryChecked) {
             _expiryChecked = true;
