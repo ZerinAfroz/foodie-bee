@@ -25,6 +25,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   DocumentSnapshot? _distributorClaim;
   bool _claiming = false;
   bool _expiryChecked = false;
+  String _appBarTitle = 'Listing Details';
 
   Color _statusColor(String status) {
     switch (status) {
@@ -80,7 +81,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       donorPhone: listingData['donorPhone'] as String? ?? '',
       distributorId: distributorId,
     );
-    _loadClaim();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Claim confirmed!')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _rejectClaim(Map<String, dynamic> listingData) async {
@@ -94,7 +99,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       listingTitle: listingData['title'] as String? ?? '',
       distributorId: distributorId,
     );
-    _loadClaim();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Claim rejected.')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _markCompleted(Map<String, dynamic> listingData) async {
@@ -108,6 +117,11 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       listingTitle: listingData['title'] as String? ?? '',
       distributorId: distributorId,
     );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pickup completed!')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _markPickedUpByDistributor(
@@ -169,7 +183,13 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Listing Details')),
+      appBar: AppBar(
+        title: Text(
+          _appBarTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('foodListings')
@@ -189,6 +209,13 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           final currentUid =
               context.read<AuthProvider>().firebaseUser!.uid;
           final isOwnListing = donorId == currentUid;
+
+          final newTitle = data['title'] as String? ?? 'Listing Details';
+          if (_appBarTitle != newTitle && mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _appBarTitle = newTitle);
+            });
+          }
 
           if (!_expiryChecked) {
             _expiryChecked = true;
@@ -318,7 +345,29 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => _rejectClaim(data),
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Reject Claim'),
+                              content: const Text(
+                                  'Are you sure you want to reject this claim?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    _rejectClaim(data);
+                                  },
+                                  child: const Text('Reject',
+                                      style: TextStyle(
+                                          color: AppTheme.errorColor)),
+                                ),
+                              ],
+                            ),
+                          ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.errorColor,
                             side: const BorderSide(color: AppTheme.errorColor),
@@ -336,7 +385,27 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () => _markCompleted(data),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Mark Completed'),
+                          content: const Text(
+                              'Confirm that the pickup has been completed?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(ctx);
+                                _markCompleted(data);
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          ],
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,

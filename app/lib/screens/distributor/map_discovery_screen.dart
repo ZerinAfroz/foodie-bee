@@ -237,10 +237,26 @@ class _MapDiscoveryScreenState extends State<MapDiscoveryScreen> {
                       ),
                     if (snapshot.hasData && listings.isEmpty)
                       Center(
-                        child: Text(
-                          'No food available near you.\nTry expanding your pickup radius.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.restaurant,
+                                size: 48, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No food available near you',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.grey[600], fontSize: 16),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Try expanding your pickup radius',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.grey[500], fontSize: 14),
+                            ),
+                          ],
                         ),
                       ),
                   ],

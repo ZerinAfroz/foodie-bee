@@ -16,16 +16,38 @@ class DonorHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Foodie Bee'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+          ),
           _NotificationBell(uid: auth.firebaseUser!.uid),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await auth.logout();
-              if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/', (_) => false);
-              }
-            },
+            onPressed: () => showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Log out'),
+                content: const Text('Are you sure you want to log out?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      await auth.logout();
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, '/', (_) => false);
+                      }
+                    },
+                    child: const Text('Log out',
+                        style: TextStyle(color: AppTheme.errorColor)),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

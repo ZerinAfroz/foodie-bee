@@ -34,8 +34,19 @@ class NotificationsScreen extends StatelessWidget {
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
             return Center(
-              child: Text('No notifications yet',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 15)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_none,
+                      size: 48, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No notifications yet',
+                    style: TextStyle(
+                        color: Colors.grey[600], fontSize: 16),
+                  ),
+                ],
+              ),
             );
           }
           return ListView.separated(
