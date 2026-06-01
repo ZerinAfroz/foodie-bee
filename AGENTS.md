@@ -10,39 +10,42 @@ Android Flutter app — connects surplus food donors with distributors in Bangla
 
 ## Build & Run
 - `JAVA_HOME` must point to java-21-openjdk (system default is Java 26 — incompatible)
-- `cd app && flutter run` on connected device (preferred for iteration — hot reload)
-- `cd app && flutter build apk --debug --target-platform=android-arm64` for a shareable debug APK
-- `cd app && flutter analyze` for lint (flutter_lints defaults, no custom rules)
-
-### Recommended build commands
-- `flutter run --debug` for hot iteration (Dart changes reload in <1 s)
-- `flutter build apk --debug --target-platform=android-arm64` to build a single-arch APK ~2x faster than universal or `--split-per-abi`
+- All flutter commands run from `app/`: `cd app && flutter run`, `cd app && flutter build apk`, etc.
+- `flutter analyze` — zero issues required before merge
+- `flutter build apk --debug --target-platform=android-arm64` for shareable debug APK
 - Add `--no-pub` to any build command once `pub get` has run (saves a few seconds)
-- Avoid `flutter clean` on 8 GB Windows — discards the Dart kernel cache (`app/build/e526d636...dill`) and forces a full rebuild next time
+- Avoid `flutter clean` on 8 GB Windows — discards the Dart kernel cache, forces full rebuild
 
 ### Low-spec Windows (8 GB) tips
-- VS Code is the recommended IDE (Android Studio + Gradle daemon will fight for 8 GB)
+- VS Code recommended (Android Studio + Gradle daemon will fight for 8 GB)
 - Close Chrome / Edge / Discord / Slack before long builds
-- Add `app/build/`, `~/.gradle/caches/`, and `~/.pub-cache/` to **Windows Defender → Virus & threat protection → Exclusions**. Real-time scan can double Gradle's wall time
-- Prefer `flutter run --debug` over `flutter build apk && adb install` for hot iteration
-- If Gradle daemon OOMs, run `gradle --stop` from `app/android/` and re-launch; check `gradle.log` for the heap dump
-- `gradle.properties` heap is capped at `Xmx3G` to leave headroom for the OS — do not raise it on 8 GB Windows
+- Add `app/build/`, `~/.gradle/caches/`, and `~/.pub-cache/` to **Windows Defender → Exclusions**. Real-time scan can double Gradle wall time
+- If Gradle daemon OOMs: `gradle --stop` from `app/android/`, then re-launch
 
 ### Build performance baseline
-- `app/android/gradle.properties` is tuned for the 8 GB Windows floor: `Xmx3G` heap, 4 workers, parallel + caching enabled
-- 14 GB Linux/Arch users can override locally: bump `org.gradle.jvmargs` to `-Xmx6G` and `org.gradle.workers.max` to `6` (uncommitted local change is fine; don't push)
-- First clean build: ~3-5 min on 8 GB Windows, ~2-3 min on Linux. Incremental: ~5-15 s.
+- `gradle.properties` tuned for 8 GB Windows floor: `Xmx3G`, 4 workers, parallel + caching
+- Linux/Arch users can override locally: bump to `Xmx6G` / `workers.max=6` (uncommitted change; don't push)
+- Incremental rebuild: ~5-15 s on either machine
 
 ## Project Structure
 - `app/` — Flutter app, Android-only (ios/web/linux/macos/windows removed from tree)
-- `app/lib/`: `config/` `providers/` `services/` `screens/` `widgets/` `models/` — `widgets/` and `screens/claim/` are empty scaffolded dirs; `models/` has only `notification_item.dart`
-- `docs/` — 10 planning/architecture documents
+- `app/lib/config/` — Theme, `constants.dart` (single source of truth for strings, reference data, status labels), `routes.dart` (15 named routes), Cloudinary config
+- `app/lib/providers/` — AuthProvider, FoodListingProvider
+- `app/lib/services/` — AuthService, StorageService (Cloudinary), NotificationService (FCM + local)
+- `app/lib/screens/` — UI grouped by role/feature
+- `app/lib/models/` — `notification_item.dart` only
+- `app/lib/widgets/` — empty scaffold
+- `docs/` — 10 planning/architecture docs
 
 ## Key Conventions
-- snake_case files, PascalCase classes, camelCase fields/vars
-- Firestore collections: camelCase
 - No code comments unless the logic is genuinely non-obvious
+- Commit prefixes: `Fix:`, `Feat:`, `Chore:` + kebab-case imperative (e.g. `Feat: add pull-to-refresh to notifications screen`)
 - `feature/*` branches → PR to `main`, no direct pushes
+- **Always ask for confirmation before committing, pushing, or opening a PR.** Show what will happen (commit message, branch name, PR title) and wait for explicit user approval.
+- All shared UI strings, reference data, status labels, and collection names live in `AppConstants` (`config/constants.dart`)
+- Android-only — do not add iOS/web/desktop scaffolding or platform guards
+- Cloudinary for images only — no `firebase_storage`
+- flutter_map + OpenStreetMap — no `google_maps_flutter` or Google API keys
 
 ## Dependencies (pub.dev)
 firebase_core, firebase_auth, cloud_firestore, cloudinary_public,
@@ -51,7 +54,12 @@ image_picker, provider, flutter_local_notifications, intl, cupertino_icons
 
 ## Critical Notes
 - `google-services.json` at `app/android/app/` — gitignored, must be present for build
-- Test phone numbers configured in Firebase Console (SMS-free OTP testing)
+- Test phone numbers configured in Firebase Console (SMS-free OTP testing with custom codes e.g. `123456`)
 - SHA-1 fingerprint registered in Firebase Console (debug keystore at `~/.android/debug.keystore`)
 - `Geocoding` package not used — map picker returns coordinates only, address typed manually
 - KGP warnings about `image_picker_android` / `package_info_plus` are non-blocking
+- Release keystore + `key.properties` at `app/android/` (gitignored); signing config is conditional (skipped if `key.properties` missing)
+- `ListingDetailScreen` route requires `Map<String, dynamic>` args: `{'listingId': String, 'viewMode': String}` — `viewMode` defaults to `'donor'` if omitted
+- Two Firestore composite indexes required for geo queries and claim lookups (configured in Firebase Console):
+  - `foodListings`: `status` Asc + `location.geohash` Asc
+  - `claims`: `listingId` Asc + `status` Asc
