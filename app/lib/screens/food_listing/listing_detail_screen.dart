@@ -346,7 +346,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: const Text('Confirm'),
+                          child: const Text(AppConstants.btnConfirm),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -361,7 +361,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx),
-                                  child: const Text('Cancel'),
+                                  child: const Text(AppConstants.btnCancel),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -401,14 +401,14 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancel'),
+                              child: const Text(AppConstants.btnCancel),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(ctx);
                                 _markCompleted(data);
                               },
-                              child: const Text('Confirm'),
+                              child: const Text(AppConstants.btnConfirm),
                             ),
                           ],
                         ),

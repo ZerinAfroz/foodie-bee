@@ -76,14 +76,14 @@ class NotificationService {
   }
 
   void _onForegroundMessage(RemoteMessage message) async {
-    final title = message.notification?.title ?? 'Foodie Bee';
+    final title = message.notification?.title ?? AppConstants.appName;
     final body = message.notification?.body ?? '';
     if (title.isEmpty && body.isEmpty) return;
 
     const androidDetails = AndroidNotificationDetails(
       'foodie_bee_channel',
-      'Foodie Bee Notifications',
-      channelDescription: 'Notifications about food claims and pickups',
+      AppConstants.notificationChannelName,
+      channelDescription: AppConstants.notificationChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
     );

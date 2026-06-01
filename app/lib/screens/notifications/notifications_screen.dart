@@ -58,7 +58,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               size: 48, color: Colors.grey[400]),
                           const SizedBox(height: 16),
                           Text(
-                            'No notifications yet',
+                            AppConstants.msgNoNotifications,
                             style: TextStyle(
                                 color: Colors.grey[600], fontSize: 16),
                           ),

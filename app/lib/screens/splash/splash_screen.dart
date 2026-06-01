@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         setState(() {
           _hasError = true;
-          _status = 'Something went wrong';
+          _status = AppConstants.msgSomethingWentWrong;
         });
       }
     }
@@ -114,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: _checkAuth,
-                child: const Text('Retry'),
+                child: const Text(AppConstants.btnRetry),
               ),
             ] else ...[
               Text(

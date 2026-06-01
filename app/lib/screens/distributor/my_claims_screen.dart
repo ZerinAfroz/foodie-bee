@@ -153,7 +153,7 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
                                       size: 48, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No claims yet',
+                                    AppConstants.msgNoClaims,
                                     style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 16),
@@ -163,7 +163,7 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
                                     onPressed: () => Navigator.pushNamed(
                                         context, Routes.mapDiscovery),
                                     icon: const Icon(Icons.map, size: 18),
-                                    label: const Text('Find food to claim'),
+                                    label: const Text(AppConstants.msgNoClaimsCta),
                                   ),
                                 ],
                               ),

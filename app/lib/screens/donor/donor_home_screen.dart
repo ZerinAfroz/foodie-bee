@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../config/constants.dart';
 import '../../config/theme.dart';
 import '../../config/routes.dart';
 import '../../services/notification_service.dart';
@@ -15,7 +16,7 @@ class DonorHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Foodie Bee'),
+        title: Text(AppConstants.appName),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
@@ -32,7 +33,7 @@ class DonorHomeScreen extends StatelessWidget {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancel'),
+                    child: const Text(AppConstants.btnCancel),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -43,7 +44,7 @@ class DonorHomeScreen extends StatelessWidget {
                             context, Routes.splash, (_) => false);
                       }
                     },
-                    child: const Text('Log out',
+                    child: const Text(AppConstants.btnLogOut,
                         style: TextStyle(color: AppTheme.errorColor)),
                   ),
                 ],

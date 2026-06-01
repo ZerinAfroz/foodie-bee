@@ -245,7 +245,7 @@ class _OTPScreenState extends State<OTPScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Verify', style: TextStyle(fontSize: 16)),
+                      : const Text(AppConstants.btnVerify, style: TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -263,7 +263,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       GestureDetector(
                         onTap: _resendOTP,
                         child: const Text(
-                          'Resend',
+                          AppConstants.btnResend,
                           style: TextStyle(
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.bold,

@@ -429,7 +429,7 @@ class _PostListingScreenState extends State<PostListingScreen> {
                             strokeWidth: 2, color: Colors.white,
                           ),
                         )
-                      : const Text('Post Listing', style: TextStyle(fontSize: 16)),
+                      : const Text(AppConstants.btnPostListing, style: TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 16),

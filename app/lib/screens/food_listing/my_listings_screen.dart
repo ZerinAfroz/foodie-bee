@@ -130,7 +130,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                                       size: 48, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No listings yet',
+                                    AppConstants.msgNoListings,
                                     style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 16),
@@ -141,7 +141,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                                         context, Routes.postListing),
                                     icon: const Icon(Icons.add, size: 18),
                                     label: const Text(
-                                        'Post your first listing'),
+                                        AppConstants.msgNoListingsCta),
                                   ),
                                 ],
                               ),
