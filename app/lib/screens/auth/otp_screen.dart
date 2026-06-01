@@ -151,55 +151,63 @@ class _OTPScreenState extends State<OTPScreen> {
                     ),
               ),
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(6, (index) {
-                  final borderColor = _error != null
-                      ? AppTheme.errorColor
-                      : Colors.grey[300]!;
-                  return Container(
-                    width: 48,
-                    height: 64,
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                    child: TextField(
-                      controller: _controllers[index],
-                      focusNode: _focusNodes[index],
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: AppTheme.primaryColor,
-                            width: 1.5,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const spacing = 8.0;
+                  const minBox = 40.0;
+                  const maxBox = 56.0;
+                  final box = ((constraints.maxWidth - 5 * spacing) / 6)
+                      .clamp(minBox, maxBox);
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(6, (index) {
+                      final borderColor = _error != null
+                          ? AppTheme.errorColor
+                          : Colors.grey[300]!;
+                      return SizedBox(
+                        width: box,
+                        height: 64,
+                        child: TextField(
+                          controller: _controllers[index],
+                          focusNode: _focusNodes[index],
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: borderColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: borderColor),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AppTheme.primaryColor,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            if (_error != null) setState(() => _error = null);
+                            if (value.isNotEmpty && index < 5) {
+                              _focusNodes[index + 1].requestFocus();
+                            } else if (value.isEmpty && index > 0) {
+                              _focusNodes[index - 1].requestFocus();
+                            }
+                          },
                         ),
-                      ),
-                      onChanged: (value) {
-                        if (_error != null) setState(() => _error = null);
-                        if (value.isNotEmpty && index < 5) {
-                          _focusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          _focusNodes[index - 1].requestFocus();
-                        }
-                      },
-                    ),
+                      );
+                    }),
                   );
-                }),
+                },
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
