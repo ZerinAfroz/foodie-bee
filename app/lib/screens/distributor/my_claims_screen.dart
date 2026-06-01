@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../widgets/error_state.dart';
 
 
 class MyClaimsScreen extends StatefulWidget {
@@ -106,7 +107,7 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
         stream: claims,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
+            return ErrorState(onRetry: () => setState(() {}));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -134,50 +135,67 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
           return TabBarView(
             controller: _tabController,
             children: tabs.map((docs) {
-              if (docs.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off,
-                          size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No claims yet',
-                        style: TextStyle(
-                            color: Colors.grey[600], fontSize: 16),
-                      ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/map-discovery'),
-                        icon: const Icon(Icons.map, size: 18),
-                        label: const Text('Find food to claim'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                itemCount: docs.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final claim = docs[index];
-                  final claimData = claim.data() as Map<String, dynamic>;
-                  final claimStatus = claimData['status'] as String? ?? '';
-                  final listingId = claimData['listingId'] as String? ?? '';
+              return RefreshIndicator(
+                onRefresh: () =>
+                    Future.delayed(const Duration(milliseconds: 600)),
+                child: docs.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 48, color: Colors.grey[400]),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No claims yet',
+                                    style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  OutlinedButton.icon(
+                                    onPressed: () => Navigator.pushNamed(
+                                        context, '/map-discovery'),
+                                    icon: const Icon(Icons.map, size: 18),
+                                    label: const Text('Find food to claim'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(
+                            AppConstants.defaultPadding),
+                        itemCount: docs.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final claim = docs[index];
+                          final claimData =
+                              claim.data() as Map<String, dynamic>;
+                          final claimStatus =
+                              claimData['status'] as String? ?? '';
+                          final listingId =
+                              claimData['listingId'] as String? ?? '';
 
-                  return _ClaimCard(
-                    claimId: claim.id,
-                    listingId: listingId,
-                    claimStatus: claimStatus,
-                    claimStatusColor: _claimStatusColor(claimStatus),
-                    onMarkPickedUp: claimStatus == 'confirmed'
-                        ? () => _markPickedUp(claim.id, listingId)
-                        : null,
-                  );
-                },
+                          return _ClaimCard(
+                            claimId: claim.id,
+                            listingId: listingId,
+                            claimStatus: claimStatus,
+                            claimStatusColor: _claimStatusColor(claimStatus),
+                            onMarkPickedUp: claimStatus == 'confirmed'
+                                ? () => _markPickedUp(claim.id, listingId)
+                                : null,
+                          );
+                        },
+                      ),
               );
             }).toList(),
           );

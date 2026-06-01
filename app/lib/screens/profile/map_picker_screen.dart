@@ -93,24 +93,57 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             top: 16,
             left: 16,
             right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 8,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Text(
-                '${_selectedLocation.latitude.toStringAsFixed(4)}, '
-                '${_selectedLocation.longitude.toStringAsFixed(4)}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14),
-              ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline,
+                          size: 18, color: Colors.black54),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Tap anywhere on the map to set your pickup location',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '${_selectedLocation.latitude.toStringAsFixed(4)}, '
+                    '${_selectedLocation.longitude.toStringAsFixed(4)}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
             ),
           ),
           Positioned(

@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
+import '../../widgets/error_state.dart';
 
 class MapDiscoveryScreen extends StatefulWidget {
   const MapDiscoveryScreen({super.key});
@@ -231,10 +232,7 @@ class _MapDiscoveryScreenState extends State<MapDiscoveryScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting)
                       const Center(child: CircularProgressIndicator()),
                     if (snapshot.hasError)
-                      Center(
-                        child: Text('Could not load listings',
-                            style: TextStyle(color: Colors.grey[600])),
-                      ),
+                      const ErrorState(message: 'Could not load listings'),
                     if (snapshot.hasData && listings.isEmpty)
                       Center(
                         child: Column(

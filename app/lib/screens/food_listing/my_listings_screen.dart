@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../widgets/error_state.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -83,7 +84,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
         stream: listings,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
+            return ErrorState(onRetry: () => setState(() {}));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -111,48 +112,68 @@ class _MyListingsScreenState extends State<MyListingsScreen>
           return TabBarView(
             controller: _tabController,
             children: tabs.map((docs) {
-              if (docs.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.restaurant_menu,
-                          size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No listings yet',
-                        style: TextStyle(
-                            color: Colors.grey[600], fontSize: 16),
+              return RefreshIndicator(
+                onRefresh: () =>
+                    Future.delayed(const Duration(milliseconds: 600)),
+                child: docs.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.restaurant_menu,
+                                      size: 48, color: Colors.grey[400]),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No listings yet',
+                                    style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  OutlinedButton.icon(
+                                    onPressed: () => Navigator.pushNamed(
+                                        context, '/post-listing'),
+                                    icon: const Icon(Icons.add, size: 18),
+                                    label: const Text(
+                                        'Post your first listing'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(
+                            AppConstants.defaultPadding),
+                        itemCount: docs.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final doc = docs[index];
+                          final data =
+                              doc.data() as Map<String, dynamic>;
+                          return _ListingCard(
+                            data: data,
+                            statusColor: _statusColor(data['status'] ?? ''),
+                            statusLabel:
+                                _statusLabel(data['status'] ?? ''),
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              '/listing-detail',
+                              arguments: {
+                                'listingId': doc.id,
+                                'viewMode': 'donor',
+                              },
+                            ),
+                          );
+                        },
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/post-listing'),
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Post your first listing'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                itemCount: docs.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final doc = docs[index];
-                  final data = doc.data() as Map<String, dynamic>;
-                  return _ListingCard(
-                    data: data,
-                    statusColor: _statusColor(data['status'] ?? ''),
-                    statusLabel: _statusLabel(data['status'] ?? ''),
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      '/listing-detail',
-                      arguments: {'listingId': doc.id, 'viewMode': 'donor'},
-                    ),
-                  );
-                },
               );
             }).toList(),
           );
