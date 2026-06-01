@@ -1,4 +1,4 @@
-# 🐝 Foodie Bee
+# Foodie Bee
 
 **Connecting surplus food donors with distributors in Bangladesh.**
 
