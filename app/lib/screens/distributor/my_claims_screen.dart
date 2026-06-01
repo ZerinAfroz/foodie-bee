@@ -280,7 +280,7 @@ class _ClaimCard extends StatelessWidget {
                                   color: Colors.grey[600], fontSize: 13)),
                         const SizedBox(height: 4),
                         Chip(
-                          label: Text(claimStatus.replaceAll('_', ' '),
+                          label: Text(AppConstants.claimStatusLabels[claimStatus] ?? claimStatus.replaceAll('_', ' '),
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 11)),
                           backgroundColor: claimStatusColor,

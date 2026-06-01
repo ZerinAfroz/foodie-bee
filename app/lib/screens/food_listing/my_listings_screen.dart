@@ -60,7 +60,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
   }
 
   String _statusLabel(String status) {
-    return status.replaceAll('_', ' ');
+    return AppConstants.foodListingStatusLabels[status] ?? status.replaceAll('_', ' ');
   }
 
   @override

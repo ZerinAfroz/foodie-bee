@@ -42,4 +42,22 @@ class AppConstants {
   ];
 
   static const List<String> quantityUnits = ['kg', 'pieces', 'plates', 'liters'];
+
+  static const Map<String, String> foodListingStatusLabels = {
+    'available': 'Available',
+    'claimed': 'Claimed',
+    'confirmed': 'Confirmed',
+    'picked_up': 'Picked Up',
+    'completed': 'Completed',
+    'expired': 'Expired',
+    'cancelled': 'Cancelled',
+  };
+
+  static const Map<String, String> claimStatusLabels = {
+    'pending': 'Pending',
+    'confirmed': 'Confirmed',
+    'rejected': 'Rejected',
+    'picked_up': 'Picked Up',
+    'completed': 'Completed',
+  };
 }
