@@ -26,15 +26,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
   TimeOfDay? _pickupEnd;
   LatLng? _location;
 
-  static const _businessTypes = [
-    'restaurant',
-    'hotel',
-    'catering',
-    'bakery',
-    'supermarket',
-    'event_hall',
-    'other',
-  ];
+  static const _businessTypes = AppConstants.businessTypes;
 
   @override
   void dispose() {

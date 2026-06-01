@@ -27,24 +27,9 @@ class _DistributorProfileScreenState extends State<DistributorProfileScreen> {
   LatLng? _location;
   final Set<String> _preferredFoodTypes = {};
 
-  static const _orgTypes = [
-    'orphanage',
-    'shelter',
-    'madrasa',
-    'mosque',
-    'community_kitchen',
-    'ngo',
-    'other',
-  ];
+  static const _orgTypes = AppConstants.organizationTypes;
 
-  static const _foodTypes = [
-    'cooked',
-    'raw',
-    'packaged',
-    'bakery',
-    'fruits_veg',
-    'other',
-  ];
+  static const _foodTypes = AppConstants.foodTypes;
 
   @override
   void dispose() {
