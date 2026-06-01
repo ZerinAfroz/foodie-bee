@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
+import '../../config/constants.dart';
 import '../../config/theme.dart';
 
 class ListingDetailScreen extends StatefulWidget {
@@ -197,7 +198,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('foodListings')
+            .collection(AppConstants.collectionFoodListings)
             .doc(widget.listingId)
             .snapshots(),
         builder: (context, snapshot) {
@@ -578,7 +579,7 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   Widget _claimantInfo(Map<String, dynamic> claim) {
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.collectionUsers)
           .doc(claim['distributorId'] as String)
           .get(),
       builder: (context, snapshot) {
