@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
+import '../../config/routes.dart';
 import '../../services/notification_service.dart';
 
 class DonorHomeScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class DonorHomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            onPressed: () => Navigator.pushNamed(context, Routes.profile),
           ),
           _NotificationBell(uid: auth.firebaseUser!.uid),
           IconButton(
@@ -39,7 +40,7 @@ class DonorHomeScreen extends StatelessWidget {
                       await auth.logout();
                       if (context.mounted) {
                         Navigator.pushNamedAndRemoveUntil(
-                            context, '/', (_) => false);
+                            context, Routes.splash, (_) => false);
                       }
                     },
                     child: const Text('Log out',
@@ -76,7 +77,7 @@ class DonorHomeScreen extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/post-listing'),
+                      Navigator.pushNamed(context, Routes.postListing),
                   icon: const Icon(Icons.add_circle_outline, size: 24),
                   label: const Text('Post Food Listing',
                       style: TextStyle(fontSize: 16)),
@@ -95,7 +96,7 @@ class DonorHomeScreen extends StatelessWidget {
                 height: 56,
                 child: OutlinedButton.icon(
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/my-listings'),
+                      Navigator.pushNamed(context, Routes.myListings),
                   icon: const Icon(Icons.list_alt, size: 24),
                   label: const Text('My Listings',
                       style: TextStyle(fontSize: 16)),
@@ -126,7 +127,7 @@ class _NotificationBell extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.notifications_outlined),
-          onPressed: () => Navigator.pushNamed(context, '/notifications'),
+          onPressed: () => Navigator.pushNamed(context, Routes.notifications),
         ),
         StreamBuilder<int>(
           stream: NotificationService.instance.unreadCount(uid),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
+import '../../config/routes.dart';
 import '../../services/notification_service.dart';
 
 class DistributorHomeScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class DistributorHomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            onPressed: () => Navigator.pushNamed(context, Routes.profile),
           ),
           _NotificationBell(uid: auth.firebaseUser!.uid),
           IconButton(
@@ -39,7 +40,7 @@ class DistributorHomeScreen extends StatelessWidget {
                       await auth.logout();
                       if (context.mounted) {
                         Navigator.pushNamedAndRemoveUntil(
-                            context, '/', (_) => false);
+                            context, Routes.splash, (_) => false);
                       }
                     },
                     child: const Text('Log out',
@@ -77,7 +78,7 @@ class DistributorHomeScreen extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/map-discovery'),
+                      Navigator.pushNamed(context, Routes.mapDiscovery),
                   icon: const Icon(Icons.map, size: 24),
                   label: const Text('Find Food Near You',
                       style: TextStyle(fontSize: 16)),
@@ -96,7 +97,7 @@ class DistributorHomeScreen extends StatelessWidget {
                 height: 56,
                 child: OutlinedButton.icon(
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/my-claims'),
+                      Navigator.pushNamed(context, Routes.myClaims),
                   icon: const Icon(Icons.list_alt, size: 24),
                   label: const Text('My Claims',
                       style: TextStyle(fontSize: 16)),
@@ -127,7 +128,7 @@ class _NotificationBell extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.notifications_outlined),
-          onPressed: () => Navigator.pushNamed(context, '/notifications'),
+          onPressed: () => Navigator.pushNamed(context, Routes.notifications),
         ),
         StreamBuilder<int>(
           stream: NotificationService.instance.unreadCount(uid),

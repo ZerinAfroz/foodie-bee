@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/constants.dart';
+import '../../config/routes.dart';
 import '../../widgets/error_state.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -143,7 +144,7 @@ class _NotificationTile extends StatelessWidget {
               (type == 'claim_received' || type == 'pickup_completed')
                   ? 'donor'
                   : 'distributor';
-          Navigator.pushNamed(context, '/listing-detail', arguments: {
+          Navigator.pushNamed(context, Routes.listingDetail, arguments: {
             'listingId': listingId,
             'viewMode': viewMode,
           });
