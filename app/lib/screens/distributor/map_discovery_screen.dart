@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
+import '../../config/routes.dart';
 import '../../widgets/error_state.dart';
 
 class MapDiscoveryScreen extends StatefulWidget {
@@ -139,7 +140,7 @@ class _MapDiscoveryScreenState extends State<MapDiscoveryScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, '/listing-detail',
+                  Navigator.pushNamed(context, Routes.listingDetail,
                       arguments: {
                         'listingId': listingId,
                         'viewMode': 'distributor',

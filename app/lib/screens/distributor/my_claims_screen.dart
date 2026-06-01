@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../config/routes.dart';
 import '../../widgets/error_state.dart';
 
 
@@ -152,7 +153,7 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
                                       size: 48, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No claims yet',
+                                    AppConstants.msgNoClaims,
                                     style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 16),
@@ -160,9 +161,9 @@ class _MyClaimsScreenState extends State<MyClaimsScreen>
                                   const SizedBox(height: 16),
                                   OutlinedButton.icon(
                                     onPressed: () => Navigator.pushNamed(
-                                        context, '/map-discovery'),
+                                        context, Routes.mapDiscovery),
                                     icon: const Icon(Icons.map, size: 18),
-                                    label: const Text('Find food to claim'),
+                                    label: const Text(AppConstants.msgNoClaimsCta),
                                   ),
                                 ],
                               ),
@@ -238,7 +239,7 @@ class _ClaimCard extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: InkWell(
-            onTap: () => Navigator.pushNamed(context, '/listing-detail',
+            onTap: () => Navigator.pushNamed(context, Routes.listingDetail,
                 arguments: {
                   'listingId': listingId,
                   'viewMode': 'distributor',
@@ -279,7 +280,7 @@ class _ClaimCard extends StatelessWidget {
                                   color: Colors.grey[600], fontSize: 13)),
                         const SizedBox(height: 4),
                         Chip(
-                          label: Text(claimStatus.replaceAll('_', ' '),
+                          label: Text(AppConstants.claimStatusLabels[claimStatus] ?? claimStatus.replaceAll('_', ' '),
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 11)),
                           backgroundColor: claimStatusColor,

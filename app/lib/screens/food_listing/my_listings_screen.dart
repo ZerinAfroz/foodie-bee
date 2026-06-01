@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../config/routes.dart';
 import '../../widgets/error_state.dart';
 
 class MyListingsScreen extends StatefulWidget {
@@ -59,7 +60,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
   }
 
   String _statusLabel(String status) {
-    return status.replaceAll('_', ' ');
+    return AppConstants.foodListingStatusLabels[status] ?? status.replaceAll('_', ' ');
   }
 
   @override
@@ -129,7 +130,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                                       size: 48, color: Colors.grey[400]),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No listings yet',
+                                    AppConstants.msgNoListings,
                                     style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 16),
@@ -137,10 +138,10 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                                   const SizedBox(height: 16),
                                   OutlinedButton.icon(
                                     onPressed: () => Navigator.pushNamed(
-                                        context, '/post-listing'),
+                                        context, Routes.postListing),
                                     icon: const Icon(Icons.add, size: 18),
                                     label: const Text(
-                                        'Post your first listing'),
+                                        AppConstants.msgNoListingsCta),
                                   ),
                                 ],
                               ),
@@ -165,7 +166,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
                                 _statusLabel(data['status'] ?? ''),
                             onTap: () => Navigator.pushNamed(
                               context,
-                              '/listing-detail',
+                              Routes.listingDetail,
                               arguments: {
                                 'listingId': doc.id,
                                 'viewMode': 'donor',

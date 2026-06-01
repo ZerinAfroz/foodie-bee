@@ -36,10 +36,8 @@ class _PostListingScreenState extends State<PostListingScreen> {
   DateTime? _pickupDeadline;
   LatLng? _location;
 
-  static const _categories = [
-    'cooked', 'raw', 'packaged', 'bakery', 'fruits_veg', 'other',
-  ];
-  static const _quantityUnits = ['kg', 'pieces', 'plates', 'liters'];
+  static const _categories = AppConstants.foodTypes;
+  static const _quantityUnits = AppConstants.quantityUnits;
 
   @override
   void initState() {
@@ -431,7 +429,7 @@ class _PostListingScreenState extends State<PostListingScreen> {
                             strokeWidth: 2, color: Colors.white,
                           ),
                         )
-                      : const Text('Post Listing', style: TextStyle(fontSize: 16)),
+                      : const Text(AppConstants.btnPostListing, style: TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 16),

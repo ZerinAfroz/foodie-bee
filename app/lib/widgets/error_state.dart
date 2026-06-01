@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/constants.dart';
 
 class ErrorState extends StatelessWidget {
   final String message;
@@ -6,7 +7,7 @@ class ErrorState extends StatelessWidget {
 
   const ErrorState({
     super.key,
-    this.message = 'Something went wrong',
+    this.message = AppConstants.msgSomethingWentWrong,
     this.onRetry,
   });
 
@@ -30,7 +31,7 @@ class ErrorState extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
+                label: const Text(AppConstants.btnRetry),
               ),
             ],
           ],

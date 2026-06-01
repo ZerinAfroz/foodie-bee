@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/constants.dart';
+import '../config/routes.dart';
 
 class NotificationService {
   static final NotificationService instance = NotificationService._();
@@ -75,14 +76,14 @@ class NotificationService {
   }
 
   void _onForegroundMessage(RemoteMessage message) async {
-    final title = message.notification?.title ?? 'Foodie Bee';
+    final title = message.notification?.title ?? AppConstants.appName;
     final body = message.notification?.body ?? '';
     if (title.isEmpty && body.isEmpty) return;
 
     const androidDetails = AndroidNotificationDetails(
       'foodie_bee_channel',
-      'Foodie Bee Notifications',
-      channelDescription: 'Notifications about food claims and pickups',
+      AppConstants.notificationChannelName,
+      channelDescription: AppConstants.notificationChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -120,7 +121,7 @@ class NotificationService {
       final viewMode = (type == 'claim_received' || type == 'pickup_completed')
           ? 'donor'
           : 'distributor';
-      navigator.pushNamed('/listing-detail', arguments: {
+      navigator.pushNamed(Routes.listingDetail, arguments: {
         'listingId': listingId,
         'viewMode': viewMode,
       });
