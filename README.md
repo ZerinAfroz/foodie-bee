@@ -22,7 +22,7 @@ A free Android app where:
 
 ---
 
-## Features (MVP)
+## Features
 
 | Feature | Description |
 |---------|-------------|
@@ -47,7 +47,7 @@ A free Android app where:
 | **Frontend** | Flutter (Android), Dart ^3.12.0 |
 | **Auth** | Firebase Auth (Phone only) |
 | **Database** | Cloud Firestore |
-| **Images** | Cloudinary (`dl5qk4r74` / `foodie-bee`) |
+| **Images** | Cloudinary |
 | **Maps** | flutter_map + OpenStreetMap (no API key) |
 | **Push** | Firebase Cloud Messaging + flutter_local_notifications |
 | **State** | Provider |
@@ -118,22 +118,6 @@ flutter build apk --debug
 3. Run `flutter analyze` — must pass with zero issues
 4. Commit and push
 5. Open a pull request to `main`
-
----
-
-## Status
-
-MVP complete. Ready for pilot testing with partner organizations.
-
-### v2 (planned)
-
-- In-app chat / messaging
-- Rating and review system
-- Impact dashboard (kg saved, CO₂ reduced)
-- Scheduled recurring pickups
-- Admin panel
-- Bangla localization
-- FCM Cloud Function for push delivery
 
 ---
 

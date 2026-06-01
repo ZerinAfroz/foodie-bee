@@ -45,15 +45,10 @@ A free Android app where:
 - Donor marks completed
 - Push notifications on key state changes
 
-### Deferred to v2
+### In progress
 
 - In-app chat/messaging
-- Rating/review system
-- Impact dashboard (kg saved, CO2 reduced)
-- Scheduled recurring pickups
-- Admin panel
 - Bangla localization
-- SMS fallback notifications
 
 ## Core Workflow
 
@@ -73,11 +68,11 @@ DONOR marks complete (status: completed)
 
 ## App Language
 
-English version first. Bangla localization planned for v2.
+English version first. Bangla localization in progress.
 
 ## Platform
 
-Android only (Flutter — enables future iOS expansion).
+Android only (Flutter).
 
 ## Monetization
 
