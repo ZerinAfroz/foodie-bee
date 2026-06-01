@@ -107,7 +107,12 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   }
 
   Future<void> _markCompleted(Map<String, dynamic> listingData) async {
-    if (_claim == null) return;
+    if (_claim == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Claim not loaded yet, please retry')),
+      );
+      return;
+    }
     final claimData = _claim!.data() as Map<String, dynamic>;
     final distributorId = claimData['distributorId'] as String;
 
@@ -231,7 +236,8 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
             }
           }
 
-          if (status == 'claimed' && _claim == null) _loadClaim();
+          const claimStatuses = ['claimed', 'confirmed', 'picked_up'];
+          if (claimStatuses.contains(status) && _claim == null) _loadClaim();
           if (widget.viewMode == 'distributor' && _distributorClaim == null) {
             final statuses = ['pending', 'confirmed', 'picked_up', 'completed'];
             if (statuses.contains(status)) _loadDistributorClaim();
