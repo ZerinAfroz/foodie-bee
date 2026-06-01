@@ -129,7 +129,7 @@ class _OTPScreenState extends State<OTPScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('Verify OTP')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),

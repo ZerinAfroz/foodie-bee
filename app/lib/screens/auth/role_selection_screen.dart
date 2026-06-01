@@ -24,7 +24,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('Choose Your Role')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
