@@ -41,29 +41,45 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           }
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+              onRefresh: () =>
+                  Future.delayed(const Duration(milliseconds: 600)),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Icon(Icons.notifications_none,
-                      size: 48, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No notifications yet',
-                    style: TextStyle(
-                        color: Colors.grey[600], fontSize: 16),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.notifications_none,
+                              size: 48, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No notifications yet',
+                            style: TextStyle(
+                                color: Colors.grey[600], fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            itemCount: docs.length,
-            separatorBuilder: (_, _) =>
-                const Divider(height: 1, indent: 72),
-            itemBuilder: (_, i) =>
-                _NotificationTile(doc: docs[i]),
+          return RefreshIndicator(
+            onRefresh: () =>
+                Future.delayed(const Duration(milliseconds: 600)),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              itemCount: docs.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, indent: 72),
+              itemBuilder: (_, i) =>
+                  _NotificationTile(doc: docs[i]),
+            ),
           );
         },
       ),
