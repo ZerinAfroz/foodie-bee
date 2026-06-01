@@ -4,9 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/constants.dart';
+import '../../widgets/error_state.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  int _retryKey = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +23,7 @@ class NotificationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Notifications')),
       body: StreamBuilder<QuerySnapshot>(
+        key: ValueKey(_retryKey),
         stream: FirebaseFirestore.instance
             .collection(AppConstants.collectionNotifications)
             .where('userId', isEqualTo: uid)
@@ -26,9 +35,8 @@ class NotificationsScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Something went wrong',
-                  style: TextStyle(color: Colors.grey[500])),
+            return ErrorState(
+              onRetry: () => setState(() => _retryKey++),
             );
           }
           final docs = snapshot.data?.docs ?? [];

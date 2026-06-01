@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../widgets/error_state.dart';
 
 class MyListingsScreen extends StatefulWidget {
   const MyListingsScreen({super.key});
@@ -83,7 +84,7 @@ class _MyListingsScreenState extends State<MyListingsScreen>
         stream: listings,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
+            return ErrorState(onRetry: () => setState(() {}));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
