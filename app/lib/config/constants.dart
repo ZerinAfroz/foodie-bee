@@ -7,6 +7,8 @@ class AppConstants {
   static const String collectionFoodListings = 'foodListings';
   static const String collectionClaims = 'claims';
   static const String collectionNotifications = 'notifications';
+  static const String collectionChats = 'chats';
+  static const String collectionMessages = 'messages';
 
   static const double defaultPadding = 16.0;
   static const double defaultRadius = 12.0;
@@ -78,6 +80,20 @@ class AppConstants {
   static const String btnSendOtp = 'Send OTP';
   static const String btnVerify = 'Verify';
   static const String btnResend = 'Resend';
+  static const String btnSend = 'Send';
+  static const String btnReject = 'Reject';
+  static const String btnMarkCompleted = 'Mark Completed';
+  static const String btnMarkPickedUp = 'Mark Picked Up';
+  static const String btnClaimThisFood = 'Claim This Food';
+  static const String btnViewDetails = 'View Details';
+  static const String btnConfirmLocation = 'Confirm Location';
+  static const String btnChangeNumber = 'Change phone number';
+  static const String btnChat = 'Chat';
+
+  static const String msgNoChats = 'No conversations yet';
+  static const String msgNoChatsCta = 'Start a conversation after a claim is confirmed';
+  static const String msgChatHint = 'Type a message...';
+  static const String msgNoMessages = 'Send a message to start the conversation';
 
   static const String notificationChannelName = 'Foodie Bee Notifications';
   static const String notificationChannelDescription =
