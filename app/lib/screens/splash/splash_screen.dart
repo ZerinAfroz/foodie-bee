@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigate(String route) {
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, route);
+    Navigator.pushNamedAndRemoveUntil(context, route, (_) => false);
   }
 
   @override
