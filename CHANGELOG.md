@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.0] — 2026-06-02
+
+### In-App Chat
+- Real-time chat between donors and distributors on confirmed claims
+- Chat created automatically when donor confirms a claim
+- Chat list screen with WhatsApp-style layout, cached names, relative time
+- Chat detail screen with date separators, input bar with animated send button
+- Unread badge on home screen chat icon (green filled avatar + red dot)
+- Unread count stream combining both donor and distributor roles
+- chat_message notification type wired through notification system
+
+### Mark All as Read
+- Batch mark all notifications as read from notifications screen
+- Confirmation dialog before marking all as read
+- Snackbar confirmation after completion
+
+### UI Bugfixes
+- Badge tap fix: IgnorePointer on notification/chat badge prevents tap interception
+- Left-aligned AppBar titles on home screens for better layout with 4 action icons
+- Navigation stack clearing at all reset points (splash, OTP, profile creation) removes unwanted back button
+- System navigation bar overlap fix in map picker and post listing screens
+- Null guard on home screens prevents crash during logout
+
 ## [0.1.0] — 2026-05-27
 
 ### Initial MVP Release
