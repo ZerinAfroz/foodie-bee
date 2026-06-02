@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/constants.dart';
 import '../../config/routes.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/error_state.dart';
 
 
@@ -18,12 +19,57 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   int _retryKey = 0;
 
+  void _confirmMarkAllRead(BuildContext context, String uid) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Mark all as read'),
+        content: const Text('Mark all notifications as read?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await NotificationService.instance.markAllAsRead(uid);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('All notifications marked as read')),
+                );
+              }
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = context.read<AuthProvider>().firebaseUser!.uid;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(
+        title: const Text('Notifications'),
+        actions: [
+          StreamBuilder<int>(
+            stream: NotificationService.instance.unreadCount(uid),
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? 0;
+              if (count == 0) return const SizedBox();
+              return IconButton(
+                icon: const Icon(Icons.done_all, size: 24),
+                tooltip: 'Mark all as read',
+                onPressed: () => _confirmMarkAllRead(context, uid),
+              );
+            },
+          ),
+        ],
+      ),
       body: StreamBuilder<QuerySnapshot>(
         key: ValueKey(_retryKey),
         stream: FirebaseFirestore.instance

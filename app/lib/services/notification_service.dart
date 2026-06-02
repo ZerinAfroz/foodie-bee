@@ -154,4 +154,20 @@ class NotificationService {
         .snapshots()
         .map((snap) => snap.docs.length);
   }
+
+  Future<void> markAllAsRead(String userId) async {
+    final unread = await FirebaseFirestore.instance
+        .collection(AppConstants.collectionNotifications)
+        .where('userId', isEqualTo: userId)
+        .where('isRead', isEqualTo: false)
+        .get();
+
+    if (unread.docs.isEmpty) return;
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in unread.docs) {
+      batch.update(doc.reference, {'isRead': true});
+    }
+    await batch.commit();
+  }
 }
