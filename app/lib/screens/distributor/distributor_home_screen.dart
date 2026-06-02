@@ -5,6 +5,7 @@ import '../../config/constants.dart';
 import '../../config/theme.dart';
 import '../../config/routes.dart';
 import '../../services/notification_service.dart';
+import '../../providers/chat_provider.dart';
 
 class DistributorHomeScreen extends StatelessWidget {
   const DistributorHomeScreen({super.key});
@@ -23,6 +24,7 @@ class DistributorHomeScreen extends StatelessWidget {
             onPressed: () => Navigator.pushNamed(context, Routes.profile),
           ),
           _NotificationBell(uid: auth.firebaseUser!.uid),
+          _ChatBell(uid: auth.firebaseUser!.uid),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => showDialog(
@@ -143,6 +145,51 @@ class _NotificationBell extends StatelessWidget {
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
                   color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                    minWidth: 18, minHeight: 18),
+                child: Text(
+                  count > 9 ? '9+' : '$count',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ChatBell extends StatelessWidget {
+  final String uid;
+  const _ChatBell({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline),
+          onPressed: () => Navigator.pushNamed(context, Routes.chatList),
+        ),
+        StreamBuilder<int>(
+          stream: context.read<ChatProvider>().unreadChatCountStream(uid),
+          builder: (context, snapshot) {
+            final count = snapshot.data ?? 0;
+            if (count == 0) return const SizedBox();
+            return Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
                   shape: BoxShape.circle,
                 ),
                 constraints: const BoxConstraints(

@@ -13,6 +13,8 @@ import '../screens/food_listing/my_listings_screen.dart';
 import '../screens/food_listing/listing_detail_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/profile/profile_view_screen.dart';
+import '../screens/chat/chat_list_screen.dart';
+import '../screens/chat/chat_detail_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -30,6 +32,8 @@ class Routes {
   static const String myClaims = '/my-claims';
   static const String notifications = '/notifications';
   static const String profile = '/profile';
+  static const String chatList = '/chat-list';
+  static const String chatDetail = '/chat-detail';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -94,6 +98,18 @@ class Routes {
       case profile:
         return MaterialPageRoute(
           builder: (_) => const ProfileViewScreen(),
+        );
+      case chatList:
+        return MaterialPageRoute(
+          builder: (_) => const ChatListScreen(),
+        );
+      case chatDetail:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ChatDetailScreen(
+            chatId: args['chatId'] as String,
+            otherUserId: args['otherUserId'] as String,
+          ),
         );
       default:
         return MaterialPageRoute(

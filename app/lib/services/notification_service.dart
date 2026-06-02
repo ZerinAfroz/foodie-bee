@@ -116,6 +116,15 @@ class NotificationService {
 
     final listingId = data['listingId'] as String?;
     final type = data['type'] as String? ?? '';
+    final chatId = data['chatId'] as String?;
+
+    if (type == 'chat_message' && chatId != null && chatId.isNotEmpty) {
+      navigator.pushNamed(Routes.chatDetail, arguments: {
+        'chatId': chatId,
+        'otherUserId': '',
+      });
+      return;
+    }
 
     if (listingId != null && listingId.isNotEmpty) {
       final viewMode = (type == 'claim_received' || type == 'pickup_completed')

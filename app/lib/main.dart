@@ -7,6 +7,7 @@ import 'config/routes.dart';
 import 'config/constants.dart';
 import 'providers/auth_provider.dart';
 import 'providers/food_listing_provider.dart';
+import 'providers/chat_provider.dart';
 import 'services/notification_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -20,6 +21,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => FoodListingProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: const FoodieBeeApp(),
     ),

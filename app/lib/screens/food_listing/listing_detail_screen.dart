@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/food_listing_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../../config/constants.dart';
 import '../../config/theme.dart';
+import '../../config/routes.dart';
 
 class ListingDetailScreen extends StatefulWidget {
   final String listingId;
@@ -27,6 +29,12 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
   bool _claiming = false;
   bool _expiryChecked = false;
   String _appBarTitle = 'Listing Details';
+
+  String get _distributorClaimStatus {
+    if (_distributorClaim == null) return '';
+    final data = _distributorClaim!.data() as Map<String, dynamic>;
+    return data['status'] as String? ?? '';
+  }
 
   Color _statusColor(String status) {
     switch (status) {
@@ -74,12 +82,14 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
     if (_claim == null) return;
     final claimData = _claim!.data() as Map<String, dynamic>;
     final distributorId = claimData['distributorId'] as String;
+    final donorId = listingData['donorId'] as String? ?? '';
 
     await context.read<FoodListingProvider>().confirmClaim(
       claimId: _claim!.id,
       listingId: widget.listingId,
       listingTitle: listingData['title'] as String? ?? '',
       donorPhone: listingData['donorPhone'] as String? ?? '',
+      donorId: donorId,
       distributorId: distributorId,
     );
     if (!mounted) return;
@@ -437,6 +447,10 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                             fontWeight: FontWeight.w500, fontSize: 15)),
                   ),
 
+                if (widget.viewMode == 'donor' &&
+                    (status == 'confirmed' || status == 'picked_up'))
+                  _buildChatButton(context, data),
+
                 if (widget.viewMode == 'distributor' &&
                     status == 'available' &&
                     !isOwnListing)
@@ -469,6 +483,12 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
                   _buildDistributorClaimStatus(data),
                   const SizedBox(height: 16),
                 ],
+
+                if (widget.viewMode == 'distributor' &&
+                    _distributorClaim != null &&
+                    (_distributorClaimStatus == 'confirmed' ||
+                        _distributorClaimStatus == 'picked_up'))
+                  _buildChatButton(context, data),
 
                 if (widget.viewMode == 'distributor' && isOwnListing)
                   Container(
@@ -601,6 +621,46 @@ class _ListingDetailScreenState extends State<ListingDetailScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildChatButton(BuildContext context, Map<String, dynamic> data) {
+    final currentUid = context.read<AuthProvider>().firebaseUser!.uid;
+    final donorId = data['donorId'] as String? ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            final claimData = _claim?.data() as Map<String, dynamic>?;
+            final distributorId =
+                claimData?['distributorId'] as String? ?? '';
+            final chatId = await context.read<ChatProvider>().findOrCreateChat(
+                  listingId: widget.listingId,
+                  donorId: donorId,
+                  distributorId: distributorId,
+                );
+            if (!context.mounted) return;
+            final otherUserId =
+                currentUid == donorId ? distributorId : donorId;
+            Navigator.pushNamed(context, Routes.chatDetail, arguments: {
+              'chatId': chatId,
+              'otherUserId': otherUserId,
+            });
+          },
+          icon: const Icon(Icons.chat_bubble_outline, size: 20),
+          label: const Text(AppConstants.btnChat),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.primaryColor,
+            side: const BorderSide(color: AppTheme.primaryColor),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+      ),
     );
   }
 }

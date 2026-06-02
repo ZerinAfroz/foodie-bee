@@ -7,6 +7,7 @@ import '../../config/constants.dart';
 import '../../config/routes.dart';
 import '../../widgets/error_state.dart';
 
+
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -139,6 +140,16 @@ class _NotificationTile extends StatelessWidget {
         if (!isRead) {
           doc.reference.update({'isRead': true});
         }
+        if (type == 'chat_message') {
+          final chatId = data['chatId'] as String?;
+          if (chatId != null && chatId.isNotEmpty) {
+            Navigator.pushNamed(context, Routes.chatDetail, arguments: {
+              'chatId': chatId,
+              'otherUserId': '',
+            });
+          }
+          return;
+        }
         if (listingId != null && listingId.isNotEmpty) {
           final viewMode =
               (type == 'claim_received' || type == 'pickup_completed')
@@ -172,6 +183,9 @@ class _NotificationTile extends StatelessWidget {
       case 'pickup_confirmed':
         icon = Icons.celebration;
         color = Colors.green;
+      case 'chat_message':
+        icon = Icons.chat;
+        color = Colors.blue;
       default:
         icon = Icons.notifications;
         color = Colors.grey;

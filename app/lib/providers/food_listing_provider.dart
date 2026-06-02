@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import '../services/storage_service.dart';
+import '../services/chat_service.dart';
 import '../config/constants.dart';
 
 class FoodListingProvider extends ChangeNotifier {
@@ -185,6 +186,7 @@ class FoodListingProvider extends ChangeNotifier {
     required String listingId,
     required String listingTitle,
     required String donorPhone,
+    required String donorId,
     required String distributorId,
   }) async {
     await updateListingStatus(listingId, 'confirmed');
@@ -197,6 +199,13 @@ class FoodListingProvider extends ChangeNotifier {
       'respondedAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+
+    final chatService = ChatService();
+    await chatService.findOrCreateChat(
+      listingId: listingId,
+      donorId: donorId,
+      distributorId: distributorId,
+    );
 
     await _writeNotification(
       userId: distributorId,

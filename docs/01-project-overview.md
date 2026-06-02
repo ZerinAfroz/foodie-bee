@@ -48,7 +48,6 @@ A free Android app where:
 ### In progress
 
 - In-app chat/messaging
-- Bangla localization
 
 ## Core Workflow
 
@@ -68,7 +67,7 @@ DONOR marks complete (status: completed)
 
 ## App Language
 
-English version first. Bangla localization in progress.
+English version first.
 
 ## Platform
 
