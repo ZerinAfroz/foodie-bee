@@ -85,7 +85,7 @@ class _DonorProfileScreenState extends State<DonorProfileScreen> {
 
     await context.read<AuthProvider>().createProfile(data);
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, Routes.donorHome);
+    Navigator.pushNamedAndRemoveUntil(context, Routes.donorHome, (_) => false);
   }
 
   void _showError(String msg) {

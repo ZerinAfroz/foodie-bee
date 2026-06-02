@@ -72,7 +72,7 @@ class _DistributorProfileScreenState extends State<DistributorProfileScreen> {
 
     await context.read<AuthProvider>().createProfile(data);
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, Routes.distributorHome);
+    Navigator.pushNamedAndRemoveUntil(context, Routes.distributorHome, (_) => false);
   }
 
   void _showError(String msg) {

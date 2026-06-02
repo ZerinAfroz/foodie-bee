@@ -148,7 +148,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           ),
           Positioned(
             right: 16,
-            bottom: 100,
+            bottom: MediaQuery.of(context).viewPadding.bottom + 88,
             child: FloatingActionButton(
               heroTag: 'myLocation',
               mini: true,
@@ -159,7 +159,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           Positioned(
             left: 16,
             right: 16,
-            bottom: 24,
+            bottom: MediaQuery.of(context).viewPadding.bottom + 16,
             child: SizedBox(
               width: double.infinity,
               height: 48,

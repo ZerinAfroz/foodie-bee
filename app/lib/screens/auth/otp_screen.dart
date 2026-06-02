@@ -93,14 +93,15 @@ class _OTPScreenState extends State<OTPScreen> {
 
     if (success) {
       if (authProvider.hasProfile) {
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamedAndRemoveUntil(
           context,
           authProvider.role == 'donor'
               ? Routes.donorHome
               : Routes.distributorHome,
+          (_) => false,
         );
       } else {
-        Navigator.pushReplacementNamed(context, Routes.roleSelection);
+        Navigator.pushNamedAndRemoveUntil(context, Routes.roleSelection, (_) => false);
       }
     } else {
       setState(() => _error = 'Invalid code. Please try again.');

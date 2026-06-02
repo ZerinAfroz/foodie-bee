@@ -185,7 +185,12 @@ class _PostListingScreenState extends State<PostListingScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Post Food Listing')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: EdgeInsets.only(
+          left: AppConstants.defaultPadding,
+          right: AppConstants.defaultPadding,
+          top: AppConstants.defaultPadding,
+          bottom: MediaQuery.of(context).viewPadding.bottom + AppConstants.defaultPadding,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
