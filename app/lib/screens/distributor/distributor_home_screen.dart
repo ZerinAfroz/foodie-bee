@@ -129,43 +129,45 @@ class _NotificationBell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () => Navigator.pushNamed(context, Routes.notifications),
-        ),
-        IgnorePointer(
-          child: StreamBuilder<int>(
-            stream: NotificationService.instance.unreadCount(uid),
-            builder: (context, snapshot) {
-              final count = snapshot.data ?? 0;
-              if (count == 0) return const SizedBox();
-              return Positioned(
+    return StreamBuilder<int>(
+      stream: NotificationService.instance.unreadCount(uid),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () =>
+                  Navigator.pushNamed(context, Routes.notifications),
+            ),
+            if (count > 0)
+              Positioned(
                 right: 6,
                 top: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                      minWidth: 18, minHeight: 18),
-                  child: Text(
-                    count > 9 ? '9+' : '$count',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints:
+                        const BoxConstraints(minWidth: 18, minHeight: 18),
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -176,43 +178,45 @@ class _ChatBell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.chat_bubble_outline),
-          onPressed: () => Navigator.pushNamed(context, Routes.chatList),
-        ),
-        IgnorePointer(
-          child: StreamBuilder<int>(
-            stream: context.read<ChatProvider>().unreadChatCountStream(uid),
-            builder: (context, snapshot) {
-              final count = snapshot.data ?? 0;
-              if (count == 0) return const SizedBox();
-              return Positioned(
+    return StreamBuilder<int>(
+      stream: context.read<ChatProvider>().unreadChatCountStream(uid),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () =>
+                  Navigator.pushNamed(context, Routes.chatList),
+            ),
+            if (count > 0)
+              Positioned(
                 right: 6,
                 top: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                      minWidth: 18, minHeight: 18),
-                  child: Text(
-                    count > 9 ? '9+' : '$count',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints:
+                        const BoxConstraints(minWidth: 18, minHeight: 18),
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+          ],
+        );
+      },
     );
   }
 }
