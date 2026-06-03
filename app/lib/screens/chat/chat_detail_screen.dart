@@ -26,7 +26,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final _scrollController = ScrollController();
   String _otherUserName = '';
   String _listingTitle = '';
-  int _prevDocCount = 0;
 
   @override
   void initState() {
@@ -35,14 +34,29 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final uid = context.read<AuthProvider>().firebaseUser!.uid;
       context.read<ChatProvider>().markAsRead(widget.chatId, uid);
-      _scrollToBottom();
     });
   }
 
   Future<void> _loadMeta() async {
     final chatProvider = context.read<ChatProvider>();
+    final uid = context.read<AuthProvider>().firebaseUser!.uid;
+
+    String otherUserId = widget.otherUserId;
+    if (otherUserId.isEmpty) {
+      final chatDoc = await FirebaseFirestore.instance
+          .collection(AppConstants.collectionChats)
+          .doc(widget.chatId)
+          .get();
+      final data = chatDoc.data();
+      if (data != null) {
+        final donorId = data['donorId'] as String? ?? '';
+        final distributorId = data['distributorId'] as String? ?? '';
+        otherUserId = uid == donorId ? distributorId : donorId;
+      }
+    }
+
     final results = await Future.wait([
-      chatProvider.getOtherUserName(widget.otherUserId),
+      chatProvider.getOtherUserName(otherUserId),
       _loadListingTitle(chatProvider),
     ]);
     if (mounted) {
@@ -83,20 +97,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           text: text,
         );
 
-    _scrollToBottom();
-  }
-
-  void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+      _scrollController.jumpTo(0);
     }
   }
 
@@ -152,7 +154,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 final docs = snapshot.data?.docs ?? [];
 
                 if (docs.isEmpty) {
-                  _prevDocCount = 0;
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -170,14 +171,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   );
                 }
 
-                if (docs.length > _prevDocCount && _prevDocCount > 0) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToBottom();
-                  });
-                }
-                _prevDocCount = docs.length;
-
                 return ListView.builder(
+                  reverse: true,
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 12),
@@ -195,9 +190,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         ? DateFormat('h:mm a').format(timestamp)
                         : '';
 
-                    final showDateSeparator = i == 0 ||
+                    final showDateSeparator = i == docs.length - 1 ||
                         _needsDateSeparator(
-                            docs[i - 1], docs[i]);
+                            docs[i], docs[i + 1]);
 
                     return Column(
                       children: [
@@ -226,13 +221,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   bool _needsDateSeparator(
-      DocumentSnapshot prev, DocumentSnapshot current) {
-    final prevTime =
-        (prev.data() as Map<String, dynamic>?)?['createdAt'] as Timestamp?;
+      DocumentSnapshot current, DocumentSnapshot next) {
     final curTime =
         (current.data() as Map<String, dynamic>?)?['createdAt'] as Timestamp?;
-    if (prevTime == null || curTime == null) return false;
-    return prevTime.toDate().day != curTime.toDate().day;
+    final nextTime =
+        (next.data() as Map<String, dynamic>?)?['createdAt'] as Timestamp?;
+    if (curTime == null || nextTime == null) return false;
+    return curTime.toDate().day != nextTime.toDate().day;
   }
 }
 
@@ -405,7 +400,7 @@ class _MessageBubble extends StatelessWidget {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
+        margin: const EdgeInsets.only(top: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
