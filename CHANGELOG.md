@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1] — 2026-06-04
+
+### Bug Fixes
+- Fix release-only badge layout: restructure Positioned as direct Stack child with clipBehavior none
+- Fix chat name not showing when navigating from notifications (resolve otherUserId from chat doc)
+- Fix chat screen opening at first message instead of most recent (reversed ListView and query)
+
 ## [0.2.0] — 2026-06-02
 
 ### In-App Chat
