@@ -38,6 +38,9 @@ class ChatService {
     required String chatId,
     required String senderId,
     required String text,
+    String? replyToId,
+    String? replyToText,
+    String? replyToSender,
   }) async {
     final chatDoc = await _firestore
         .collection(AppConstants.collectionChats)
@@ -58,12 +61,18 @@ class ChatService {
         .collection(AppConstants.collectionMessages)
         .doc();
 
-    batch.set(msgRef, {
+    final messageData = <String, dynamic>{
       'senderId': senderId,
       'text': text,
+      'searchableText': text.toLowerCase(),
       'isRead': false,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+    if (replyToId != null) messageData['replyToId'] = replyToId;
+    if (replyToText != null) messageData['replyToText'] = replyToText;
+    if (replyToSender != null) messageData['replyToSender'] = replyToSender;
+
+    batch.set(msgRef, messageData);
 
     final chatRef =
         _firestore.collection(AppConstants.collectionChats).doc(chatId);
@@ -127,7 +136,10 @@ class ChatService {
 
     final batch = _firestore.batch();
     for (final doc in unreadMessages.docs) {
-      batch.update(doc.reference, {'isRead': true});
+      batch.update(doc.reference, {
+        'isRead': true,
+        'readBy.$userId': FieldValue.serverTimestamp(),
+      });
     }
     if (unreadMessages.docs.isNotEmpty) {
       await batch.commit();
@@ -166,5 +178,126 @@ class ChatService {
       final distSnap = await distributorQuery.get();
       yield donorSnap.docs.length + distSnap.docs.length;
     }
+  }
+
+  Future<void> pinChat(String chatId, String userId) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    final chatDoc = await chatRef.get();
+    final pinnedBy =
+        List<String>.from(chatDoc.data()?['pinnedBy'] as List<dynamic>? ?? []);
+
+    if (pinnedBy.contains(userId)) {
+      await chatRef.update({
+        'pinnedBy': FieldValue.arrayRemove([userId]),
+      });
+    } else {
+      await chatRef.update({
+        'pinnedBy': FieldValue.arrayUnion([userId]),
+      });
+    }
+  }
+
+  Future<void> muteChat(String chatId, String userId) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    final chatDoc = await chatRef.get();
+    final mutedBy =
+        List<String>.from(chatDoc.data()?['mutedBy'] as List<dynamic>? ?? []);
+
+    if (mutedBy.contains(userId)) {
+      await chatRef.update({
+        'mutedBy': FieldValue.arrayRemove([userId]),
+      });
+    } else {
+      await chatRef.update({
+        'mutedBy': FieldValue.arrayUnion([userId]),
+      });
+    }
+  }
+
+  Future<void> archiveChat(String chatId, String userId) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    await chatRef.update({
+      'archivedBy': FieldValue.arrayUnion([userId]),
+    });
+  }
+
+  Future<void> unarchiveChat(String chatId, String userId) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    await chatRef.update({
+      'archivedBy': FieldValue.arrayRemove([userId]),
+    });
+  }
+
+  Future<void> deleteChatForMe(String chatId, String userId) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    await chatRef.update({
+      'deletedBy': FieldValue.arrayUnion([userId]),
+    });
+  }
+
+  Future<void> deleteMessage(String chatId, String messageId) async {
+    final msgRef = _firestore
+        .collection(AppConstants.collectionChats)
+        .doc(chatId)
+        .collection(AppConstants.collectionMessages)
+        .doc(messageId);
+    await msgRef.update({'isDeleted': true});
+  }
+
+  Future<void> editMessage(String chatId, String messageId, String newText) async {
+    final msgRef = _firestore
+        .collection(AppConstants.collectionChats)
+        .doc(chatId)
+        .collection(AppConstants.collectionMessages)
+        .doc(messageId);
+    await msgRef.update({
+      'text': newText,
+      'searchableText': newText.toLowerCase(),
+      'isEdited': true,
+    });
+
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    final chatDoc = await chatRef.get();
+    if (chatDoc.data()?['lastMessage'] != null) {
+      await chatRef.update({'lastMessage': newText});
+    }
+  }
+
+  Future<void> setTyping(String chatId, String userId, bool isTyping) async {
+    final chatRef =
+        _firestore.collection(AppConstants.collectionChats).doc(chatId);
+    if (isTyping) {
+      await chatRef.update({
+        'typing': FieldValue.arrayUnion([userId]),
+      });
+    } else {
+      await chatRef.update({
+        'typing': FieldValue.arrayRemove([userId]),
+      });
+    }
+  }
+
+  Future<void> addReaction(String chatId, String messageId, String userId, String emoji) async {
+    final msgRef = _firestore
+        .collection(AppConstants.collectionChats)
+        .doc(chatId)
+        .collection(AppConstants.collectionMessages)
+        .doc(messageId);
+    await msgRef.update({'reactions.$userId': emoji});
+  }
+
+  Future<void> removeReaction(String chatId, String messageId, String userId) async {
+    final msgRef = _firestore
+        .collection(AppConstants.collectionChats)
+        .doc(chatId)
+        .collection(AppConstants.collectionMessages)
+        .doc(messageId);
+    await msgRef.update({'reactions.$userId': FieldValue.delete()});
   }
 }
