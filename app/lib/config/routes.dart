@@ -15,6 +15,8 @@ import '../screens/notifications/notifications_screen.dart';
 import '../screens/profile/profile_view_screen.dart';
 import '../screens/chat/chat_list_screen.dart';
 import '../screens/chat/chat_detail_screen.dart';
+import '../screens/chat/archived_chats_screen.dart';
+import '../screens/chat/forward_picker_screen.dart';
 
 class Routes {
   static const String splash = '/';
@@ -34,6 +36,8 @@ class Routes {
   static const String profile = '/profile';
   static const String chatList = '/chat-list';
   static const String chatDetail = '/chat-detail';
+  static const String archivedChats = '/archived-chats';
+  static const String forwardPicker = '/forward-picker';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -109,6 +113,17 @@ class Routes {
           builder: (_) => ChatDetailScreen(
             chatId: args['chatId'] as String,
             otherUserId: args['otherUserId'] as String,
+          ),
+        );
+      case archivedChats:
+        return MaterialPageRoute(
+          builder: (_) => const ArchivedChatsScreen(),
+        );
+      case forwardPicker:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ForwardPickerScreen(
+            textToForward: args['text'] as String,
           ),
         );
       default:

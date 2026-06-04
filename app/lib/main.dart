@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
 import 'config/theme.dart';
 import 'config/routes.dart';
@@ -28,6 +29,12 @@ void main() async {
   );
 
   NotificationService.instance.init(navigatorKey: navigatorKey);
+
+  FirebaseAuth.instance.authStateChanges().listen((user) {
+    if (user != null) {
+      ChatProvider().updateLastSeen(user.uid);
+    }
+  });
 
   Timer.periodic(const Duration(seconds: 60), (_) async {
     final provider = FoodListingProvider();

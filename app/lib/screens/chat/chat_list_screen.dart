@@ -16,7 +16,16 @@ class ChatListScreen extends StatelessWidget {
     final chatProvider = context.read<ChatProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chats')),
+      appBar: AppBar(
+        title: const Text('Chats'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.archive_outlined),
+            tooltip: 'Archived',
+            onPressed: () => Navigator.pushNamed(context, Routes.archivedChats),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<QuerySnapshot>>(
         stream: _combineChats(chatProvider, uid),
         builder: (context, snapshot) {
@@ -45,7 +54,36 @@ class ChatListScreen extends StatelessWidget {
           }
 
           final allDocs = snapshot.data ?? [];
-          final docs = allDocs.expand((s) => s.docs).toList();
+          var docs = allDocs.expand((s) => s.docs).toList();
+
+          docs = docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final deletedBy =
+                List<String>.from(data['deletedBy'] as List<dynamic>? ?? []);
+            final archivedBy =
+                List<String>.from(data['archivedBy'] as List<dynamic>? ?? []);
+            return !deletedBy.contains(uid) && !archivedBy.contains(uid);
+          }).toList();
+
+          docs.sort((a, b) {
+            final aData = a.data() as Map<String, dynamic>;
+            final bData = b.data() as Map<String, dynamic>;
+            final aPinned =
+                List<String>.from(aData['pinnedBy'] as List<dynamic>? ?? []);
+            final bPinned =
+                List<String>.from(bData['pinnedBy'] as List<dynamic>? ?? []);
+            final aIsPinned = aPinned.contains(uid) ? 1 : 0;
+            final bIsPinned = bPinned.contains(uid) ? 1 : 0;
+            if (aIsPinned != bIsPinned) return bIsPinned - aIsPinned;
+
+            final aTime =
+                (aData['lastMessageAt'] as Timestamp?)?.toDate() ??
+                    DateTime(0);
+            final bTime =
+                (bData['lastMessageAt'] as Timestamp?)?.toDate() ??
+                    DateTime(0);
+            return bTime.compareTo(aTime);
+          });
 
           if (docs.isEmpty) {
             return Center(
@@ -171,6 +209,63 @@ class _ChatTileState extends State<_ChatTile> {
     }
   }
 
+  void _showContextMenu(BuildContext context) {
+    final data = widget.chat.data() as Map<String, dynamic>;
+    final pinnedBy =
+        List<String>.from(data['pinnedBy'] as List<dynamic>? ?? []);
+    final mutedBy =
+        List<String>.from(data['mutedBy'] as List<dynamic>? ?? []);
+    final isPinned = pinnedBy.contains(widget.currentUid);
+    final isMuted = mutedBy.contains(widget.currentUid);
+    final chatProvider = context.read<ChatProvider>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(isPinned ? Icons.push_pin_outlined : Icons.push_pin),
+              title: Text(isPinned ? 'Unpin' : 'Pin'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await chatProvider.pinChat(widget.chat.id, widget.currentUid);
+              },
+            ),
+            ListTile(
+              leading: Icon(isMuted ? Icons.volume_up : Icons.volume_off),
+              title: Text(isMuted ? 'Unmute' : 'Mute'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await chatProvider.muteChat(widget.chat.id, widget.currentUid);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.archive),
+              title: const Text('Archive'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await chatProvider.archiveChat(
+                    widget.chat.id, widget.currentUid);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: AppTheme.errorColor),
+              title: const Text('Delete',
+                  style: TextStyle(color: AppTheme.errorColor)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await chatProvider.deleteChatForMe(
+                    widget.chat.id, widget.currentUid);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.chat.data() as Map<String, dynamic>;
@@ -183,7 +278,13 @@ class _ChatTileState extends State<_ChatTile> {
         (data['lastMessageAt'] as Timestamp?)?.toDate();
     final unreadBy =
         List<String>.from(data['unreadBy'] as List<dynamic>? ?? []);
+    final pinnedBy =
+        List<String>.from(data['pinnedBy'] as List<dynamic>? ?? []);
+    final mutedBy =
+        List<String>.from(data['mutedBy'] as List<dynamic>? ?? []);
     final isUnread = unreadBy.contains(widget.currentUid);
+    final isPinned = pinnedBy.contains(widget.currentUid);
+    final isMuted = mutedBy.contains(widget.currentUid);
 
     final timeStr =
         lastMessageAt != null ? _relativeTime(lastMessageAt) : '';
@@ -191,95 +292,108 @@ class _ChatTileState extends State<_ChatTile> {
         ? _otherUserName[0].toUpperCase()
         : '?';
 
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          Routes.chatDetail,
-          arguments: {
-            'chatId': widget.chat.id,
-            'otherUserId': otherUserId,
-          },
-        );
-      },
-      child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        child: Row(
-          children: [
-            _AvatarWithBadge(
-              initials: initials,
-              isUnread: isUnread,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
+    return GestureDetector(
+      onLongPress: () => _showContextMenu(context),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            Routes.chatDetail,
+            arguments: {
+              'chatId': widget.chat.id,
+              'otherUserId': otherUserId,
+            },
+          );
+        },
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Row(
+            children: [
+              _AvatarWithBadge(
+                initials: initials,
+                isUnread: isUnread,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (isPinned) ...[
+                          Icon(Icons.push_pin, size: 14, color: Colors.grey[500]),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(
+                          child: Text(
+                            _loaded ? _otherUserName : 'Loading...',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isUnread
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (isMuted)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: Icon(Icons.volume_off,
+                                size: 14, color: Colors.grey[500]),
+                          ),
+                        Text(
+                          timeStr,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isUnread
+                                ? AppTheme.primaryColor
+                                : Colors.grey[500],
+                            fontWeight: isUnread
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    if (_listingTitle.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
                         child: Text(
-                          _loaded ? _otherUserName : 'Loading...',
+                          _listingTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isUnread
-                                ? FontWeight.w700
-                                : FontWeight.w600,
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      Text(
-                        timeStr,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isUnread
-                              ? AppTheme.primaryColor
-                              : Colors.grey[500],
-                          fontWeight: isUnread
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  if (_listingTitle.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        _listingTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Text(
+                      lastMessage.isNotEmpty
+                          ? lastMessage
+                          : 'No messages yet',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isUnread
+                            ? Colors.black87
+                            : Colors.grey[500],
+                        fontWeight: isUnread
+                            ? FontWeight.w500
+                            : FontWeight.normal,
                       ),
                     ),
-                  Text(
-                    lastMessage.isNotEmpty
-                        ? lastMessage
-                        : 'No messages yet',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isUnread
-                          ? Colors.black87
-                          : Colors.grey[500],
-                      fontWeight: isUnread
-                          ? FontWeight.w500
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
