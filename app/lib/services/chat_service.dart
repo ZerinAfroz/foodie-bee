@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/constants.dart';
 
@@ -173,10 +174,10 @@ class ChatService {
         .where('distributorId', isEqualTo: userId)
         .where('unreadBy', arrayContains: userId);
 
-    await for (final _ in donorQuery.snapshots()) {
-      final donorSnap = await donorQuery.get();
-      final distSnap = await distributorQuery.get();
-      yield donorSnap.docs.length + distSnap.docs.length;
+    await for (final snapshots in StreamZip(
+        [donorQuery.snapshots(), distributorQuery.snapshots()])) {
+      yield (snapshots[0] as QuerySnapshot).docs.length +
+          (snapshots[1] as QuerySnapshot).docs.length;
     }
   }
 
