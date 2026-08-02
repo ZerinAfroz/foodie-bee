@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -32,8 +33,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   bool _isSearching = false;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   Stream<DocumentSnapshot>? _otherUserStatusStream;
+  StreamSubscription<DocumentSnapshot>? _otherUserStatusSub;
   DateTime? _otherUserLastSeen;
   Stream<DocumentSnapshot>? _chatStream;
+  StreamSubscription<DocumentSnapshot>? _chatStreamSub;
   bool _isOtherUserTyping = false;
   DateTime? _lastTypingUpdate;
   bool _isTyping = false;
@@ -173,7 +176,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       });
 
       _otherUserStatusStream = chatProvider.getOtherUserStatus(otherUserId);
-      _otherUserStatusStream!.listen((doc) {
+      _otherUserStatusSub = _otherUserStatusStream!.listen((doc) {
         if (!mounted) return;
         final data = doc.data() as Map<String, dynamic>?;
         final lastSeen = (data?['lastSeen'] as Timestamp?)?.toDate();
@@ -183,7 +186,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       });
 
       _chatStream = chatProvider.getChatStream(widget.chatId);
-      _chatStream!.listen((doc) {
+      _chatStreamSub = _chatStream!.listen((doc) {
         if (!mounted) return;
         final data = doc.data() as Map<String, dynamic>?;
         final typing = List<String>.from(data?['typing'] as List<dynamic>? ?? []);
@@ -210,6 +213,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     if (_uid != null) {
       _chatProvider?.setTyping(widget.chatId, _uid!, false);
     }
+    _otherUserStatusSub?.cancel();
+    _chatStreamSub?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
@@ -222,23 +227,31 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     if (text.isEmpty) return;
 
     final uid = context.read<AuthProvider>().firebaseUser!.uid;
-    _messageController.clear();
-    _isTyping = false;
-    context.read<ChatProvider>().setTyping(widget.chatId, uid, false);
-
     final replyId = _replyToMessage?['id'] as String?;
     final replyText = _replyToMessage?['text'] as String?;
     final replySender = _replyToMessage?['senderName'] as String?;
-    setState(() => _replyToMessage = null);
 
-    await context.read<ChatProvider>().sendMessage(
-          chatId: widget.chatId,
-          senderId: uid,
-          text: text,
-          replyToId: replyId,
-          replyToText: replyText,
-          replyToSender: replySender,
-        );
+    try {
+      await context.read<ChatProvider>().sendMessage(
+            chatId: widget.chatId,
+            senderId: uid,
+            text: text,
+            replyToId: replyId,
+            replyToText: replyText,
+            replyToSender: replySender,
+          );
+      _messageController.clear();
+      setState(() => _replyToMessage = null);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not send message')),
+      );
+      return;
+    }
+
+    _isTyping = false;
+    _chatProvider?.setTyping(widget.chatId, uid, false);
 
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0);
@@ -409,6 +422,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         _MessageBubble(
                           messageId: doc.id,
                           chatId: widget.chatId,
+                          senderId: senderId,
                           text: text,
                           time: timeStr,
                           isMe: isMe,
@@ -685,6 +699,7 @@ class _InputBarState extends State<_InputBar>
 class _MessageBubble extends StatefulWidget {
   final String messageId;
   final String chatId;
+  final String senderId;
   final String text;
   final String time;
   final bool isMe;
@@ -703,6 +718,7 @@ class _MessageBubble extends StatefulWidget {
   const _MessageBubble({
     required this.messageId,
     required this.chatId,
+    required this.senderId,
     required this.text,
     required this.time,
     required this.isMe,
@@ -963,8 +979,8 @@ class _MessageBubbleState extends State<_MessageBubble> {
   void _handleReply() async {
     if (widget.onReply == null) return;
 
-    final uid = context.read<AuthProvider>().firebaseUser!.uid;
-    final senderName = await context.read<ChatProvider>().getOtherUserName(uid);
+    final senderName =
+        await context.read<ChatProvider>().getOtherUserName(widget.senderId);
 
     widget.onReply!({
       'id': widget.messageId,

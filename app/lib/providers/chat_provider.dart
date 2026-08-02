@@ -193,10 +193,17 @@ class ChatProvider extends ChangeNotifier {
     required String senderId,
     required String text,
   }) async {
+    final forwardedText = '[Forwarded] $text';
     await _chatService.sendMessage(
       chatId: chatId,
       senderId: senderId,
-      text: '[Forwarded] $text',
+      text: forwardedText,
+    );
+
+    await _writeChatNotification(
+      chatId: chatId,
+      senderId: senderId,
+      text: forwardedText,
     );
   }
 

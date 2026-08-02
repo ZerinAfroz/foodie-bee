@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:async/async.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../providers/auth_provider.dart';
@@ -102,10 +103,8 @@ class ArchivedChatsScreen extends StatelessWidget {
     final distributorStream =
         provider.getChatsForUserAsDistributor(uid);
 
-    await for (final donorSnap in donorStream) {
-      await for (final distSnap in distributorStream) {
-        yield [donorSnap, distSnap];
-      }
+    await for (final snapshots in StreamZip([donorStream, distributorStream])) {
+      yield [snapshots[0], snapshots[1]];
     }
   }
 }
