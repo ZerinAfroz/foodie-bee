@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.0] — 2026-08-03
+
+### Chat Messaging Features
+
+#### Message Actions
+- Reply to a message via swipe-right or long-press context menu, with quote preview above the input bar
+- Forward a message to another chat with an in-app chat picker screen (\[Forwarded\] prefix)
+- Edit your own messages in-place within 30 minutes (\"(edited)\" label)
+- Delete messages with confirmation (shows \"Message deleted\" placeholder)
+
+#### Message Search
+- Search bar in chat detail screen toggled from AppBar icon
+- Client-side message filtering with yellow text highlighting on matches
+
+#### Read Receipts
+- Two-state receipts: single grey check (sent), double blue check (read by recipient)
+- Read state synced via readBy map on each message
+
+#### Emoji Reactions
+- Long-press a message → 6-emoji quick picker (👍❤️😂😮😢🙏)
+- Reaction chips below bubbles with counts; tap toggles your reaction
+
+#### Chat Status
+- Online / last-seen indicator in chat AppBar (green dot when online)
+- Typing indicator in AppBar with 3s debounce
+
+#### Chat Management
+- Pin / unpin, mute / unmute, archive / unarchive chats from chat list context menu
+- Archived chats screen with long-press to unarchive or delete
+- Delete chat for yourself (soft delete, hides from sender only)
+- Pinned chats sorted first, pin/mute visual icons on tiles
+
+#### Scroll-to-Bottom Button
+- Double-arrow button above the input bar, right-aligned
+- Appears only when scrolled up from the bottom (WhatsApp-style behavior)
+
+### Bug Fixes
+- Fix crash on chat screen dispose: cache provider and uid references in initState
+- Fix chat list redesign, remove stale filter behavior
+
 ## [0.2.1] — 2026-06-04
 
 ### Bug Fixes
